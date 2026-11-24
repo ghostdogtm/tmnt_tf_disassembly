@@ -2452,3 +2452,85 @@ code DCF8-DCF9
 DCF8 UnusedSetFlickerAttrX0 ; no caller: X = 0, falls into SetFlickerAttr
 code E5F6-E5F7
 E5F6 UnusedIncStoryStage ; no caller: INC storyStage, falls into StoryMatchLostCheck
+
+; ---------------------------------------------------------------------------------------------------- source modules (one src/prg file each)
+module 00:8000 sound_frame ; SoundFrame, fade, UpdateChannel, volume / envelope / vibrato / echo
+module 00:8404 sound_music ; ReadStream / ReadMusic, note timers, periods, drums, DPCM start, SC_* setup commands
+module 00:8872 sound_stream ; ReadSfx, SFX commands, WritePeriod, loop / call / repeat / end, ChannelOff, RestoreChannels
+module 00:8C59 sound_start ; SndJumpTable, period table, SfxPtrs / SongPtrs, SoundStart, StartMusic, fade-out
+module 00:909E sound_data ; SFX streams, envelopes, DpcmSamples
+module 00:95FF music_2e_2f ; songs 2E and 2F
+module 01:A000 music_30_31 ; tail of song 2F, songs 30 and 31
+module 01:A915 music_32_38 ; songs 37, 32-36, 38
+module 01:AEFB music_39_3d ; songs 39-3D
+module 01:B828 music_3e_46 ; songs 3E-46
+module 02:8000 fighter_phase ; UpdateFighters, phases, stand, attack start, knockdown, shot
+module 02:84FC fighter_states ; StateJump, special, turn, crouch, StateCharMove
+module 02:88A9 fighter_ko ; StateWin, PhaseKo, KO sequence
+module 02:8AC1 fighter_move ; PickCloseFar, SetFighterPose, RunMove, ReadMoveScript
+module 02:8C18 fighter_hurt ; StateHurt and the hurt reactions
+module 02:8FC9 fighter_hold ; StateHold, StateHeld, hold / held animation
+module 02:936A fighter_tables ; per-character tables, MovePtrs and move scripts, HoldAnim, CharPoses
+module 02:99D9 special_input ; ReadSpecialInput, per-character special input, ReadBallInput
+module 02:9E4F ball ; BallPhaseRun, ball spawn / idle / flight / held / thrown / bounce
+module 03:A000 ball_launch ; LaunchBall, ball launch steps, BallClampX
+module 03:A23F attack_objs ; UpdateAttackObjs, per-character attack phases and tables
+module 03:A82D slot7_obj ; TurtlePower, slot 7 object
+module 03:A991 hit_check ; CheckHits, SetHurtState, HitReaction, hit sparks, hit tables
+module 03:AD91 fighter_boxes ; SeparateFighters, FightersEdgeCheck, SetFighterBox, box tables
+module 03:AFF6 scores ; DrawScores, AddScore, score tables
+module 03:B11A fighter_chr ; NearBall, SetFighterChrBanks, FrameChr, ChrBankPairs
+module 03:B35C specials_a ; Leo, Raph, Mike and Don specials
+module 03:B75E specials_b ; Shredder bolts, Casey jump kick / rain, Hothead fire, special frame tables
+module 03:BA96 fight_frame ; ReadDashInput, DashAnimStep, win voices, FightFrame, AttackObjHitCheck
+module 03:BD7C intro_objs ; intro fighters, fight banner, board splinters
+module 04:8000 frames_turtles ; FramesTurtles and the turtle frames
+module 04:8E13 frames_casey ; FramesCasey
+module 04:9B52 frames_hothead ; FramesHothead (continues in bank 05)
+module 05:A000 frames_hothead ; rest of the Hothead frames
+module 05:AEC5 frames_shredder ; FramesShredder
+module 05:BB9E frames_unused ; FramesUnused (no reference)
+module 06:8000 charselect ; PlayInputScript and input scripts, character select
+module 06:836A screens_front ; Konami, Title, FightHud, BonusLogo, Waterfront, Sewer, Legal screens
+module 06:8BDB screens_select ; PirateShip, PlayerSelect, VsSetup, Downtown screens
+module 06:949C screens_modes ; Tournament, BonusGame, NameEntry screens
+module 06:9BA6 screens_end ; EndingShredder, EndingTurtles, Ranking, Vs, Option screens
+module 08:8000 ppu_text ; RunPpuQueue, DrawText, TextPtrs and the text strings
+module 08:8235 metasprites ; MetaspritePtrs, CommonFrame
+module 0A:8000 ai_core ; RunCpuAi, AiInit, AiRunAction, step script, AiExecByte
+module 0A:84E6 ai_conditions ; the AiCond routines
+module 0A:8B0B ai_scripts ; AiScriptPtrs, AiScript, AiHoldTimes
+module 0A:8DEB ai_leo ; AiDecideLeo, Leo trees and acts
+module 0A:90BC ai_raph_don ; Raph and Don trees
+module 0A:93BD ai_mike_casey ; Mike and Casey trees
+module 0A:985C ai_hothead_shredder ; Hothead and Shredder trees
+module 0A:9BD6 ai_react ; AiReact routines (the JSR JumpTable at 9FFF continues in bank 0B)
+module 0C:8000 option ; option screen, BGM test
+module 0C:82BB tournament_vsinfo ; tournament bracket, DrawVsFighterInfo, VsInfo
+module 0C:85D6 continue ; continue screen
+module 0C:8890 vs_setup ; VS CPU strength and stage select
+module 0C:8A6A fight_end_bonus ; fight-end bonus
+module 0C:8C7B name_entry ; name entry
+module 0C:909F intro ; intro, parade
+module 0C:9600 ending ; ending
+module 0C:996B credits_story ; credits, story text box, StoryText data
+module 0C:9F2B ranking ; InsertHighScores, RankingScreen (continues in bank 0D)
+module C000 dpcm_sfx ; DPCM sample data, then the first sound effects
+module D000 util ; ClearGameRam, JumpTable, AnimCycle, speed and facing helpers, PPU queue push, game modes
+module D346 palette ; SetPaletteEntry, LoadPaletteSets, fades, PaletteUploadRun
+module D71F sprites ; DrawObjects, DrawMetasprite, SpriteSetPtrs
+module D88C math ; BCD add, multiply, divide, angle / sin / cos (mostly unused)
+module DABE objects ; ClearAllObjs, move / velocity, CHR bank setters, gravity, flip
+module DDB6 fighter_util ; SetCrouch, damage and KO, RunAnim, StartAnim, win / lose animation
+module E000 anim_util ; AnimData, fade and screen-task starters, ScaleTime / ScaleSpeed
+module E187 fight_start ; FightSubState, FightStart, FightVsScreen, fight palettes, stage intro scroll, FightRoundSetup
+module E46D fight_round ; round intro / running / over, challenger, KO pause, match over, win pose
+module E7A1 fight_cards ; bonus game card, lost, challenger card, Shredder taunt
+module E90E fight_hud ; per-stage tables, FightFrameClear, HUD, health bar, names
+module EC5B ai_helpers ; AiCheckShot, AiForward, AiRandom, GetBallRange, GetTargetRange
+module F000 screen_load ; TitleScreenInit, LoadScreen, ScreenPtrs, ScreenBanks
+module F174 core ; Reset, MainLoop, Nmi, joypads, InitPpuHardware, GameFrame
+module F380 game_modes ; RunGameMode, title / demo / Konami / legal modes, mode timers
+module F5DB banking ; PushBank, SetChrBanks, PlaySound, UpdateSound, Far wrappers
+module F814 irq_mmc3 ; SetIrqSplit, Irq and stage handlers, MMC3 CHR and mirroring helpers
+module FCC9 fight_tail ; BuildFloorScrollTable, FightFrameTail, CheckNametableSignature, vectors

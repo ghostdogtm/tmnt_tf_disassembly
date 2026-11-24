@@ -70,7 +70,7 @@ to print a character in the console.
 
 ```
 src/main.asm             includes everything in bank order          (generated)
-src/prg/BB_bank.asm      one file per 8 KB PRG bank 00-0F           (generated)
+src/prg/BB_name.asm      one file per module (84 files, 8 KB banks split by subject; docs/modules.md)  (generated)
 src/chr.asm, src/chr/    CHR ROM as 16 .incbin files of 8 KB        (generated, chr/ not in git)
 src/defines.inc          hardware registers, unresolved raw symbols (generated)
 src/ram.inc              RAM names                                  (generated from tools/labels/ram.txt)
@@ -283,6 +283,7 @@ players), so nothing else changes.
 | [docs/const-names.md](docs/const-names.md) | Constants named by script by routine (where a value is loaded, not what it means) and which of their sites ran in Mesen |
 | [docs/sound.md](docs/sound.md) | sound driver: channels, music and effect stream commands (`sound`, `soundptrs`), envelopes (stream reads checked in Mesen) |
 | [docs/coverage.txt](docs/coverage.txt) | code / data / unknown bytes per bank |
+| [docs/modules.md](docs/modules.md) | which source file in `src/prg/` holds what (from the `module` lines of rom.txt) |
 | [docs/unknown.txt](docs/unknown.txt) | bytes no log ever read |
 | [docs/unread.md](docs/unread.md) | what the biggest unread regions sit in |
 | [docs/xref.txt](docs/xref.txt) | cross-reference report |

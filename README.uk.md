@@ -69,7 +69,7 @@ python tools/disasm.py --build
 
 ```
 src/main.asm             підключає все в порядку банків             (генерується)
-src/prg/BB_bank.asm      по файлу на 8 КБ банк PRG 00-0F            (генерується)
+src/prg/BB_name.asm      по файлу на модуль (84 файли, 8 КБ банки розбито за змістом; docs/modules.md)  (генерується)
 src/chr.asm, src/chr/    CHR ROM: 16 файлів .incbin по 8 КБ         (генерується, chr/ не в git)
 src/defines.inc          регістри заліза, сирі символи              (генерується)
 src/ram.inc              імена RAM                                  (з tools/labels/ram.txt)
@@ -285,6 +285,7 @@ make fixed PATCHES=all | 1,3 | -2,6                 # те саме через m
 | [docs/const-names.md](docs/const-names.md) | Константи, названі скриптом за процедурою (де значення завантажується, а не що воно означає), і які з їхніх місць виконувались у Mesen |
 | [docs/sound.md](docs/sound.md) | звуковий драйвер: канали, команди потоків музики й ефектів (`sound`, `soundptrs`), обвідні (читання потоків перевірено в Mesen) |
 | [docs/coverage.txt](docs/coverage.txt) | байти коду / даних / невідомі по банках |
+| [docs/modules.md](docs/modules.md) | який файл у `src/prg/` що містить (з рядків `module` у rom.txt) |
 | [docs/unknown.txt](docs/unknown.txt) | байти, яких жоден журнал не прочитав |
 | [docs/unread.md](docs/unread.md) | де лежать найбільші непрочитані ділянки |
 | [docs/xref.txt](docs/xref.txt) | звіт перехресних посилань |

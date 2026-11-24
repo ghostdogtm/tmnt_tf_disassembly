@@ -32,6 +32,12 @@ BRANCH = {'BCC', 'BCS', 'BEQ', 'BNE', 'BMI', 'BPL', 'BVC', 'BVS'}
 REG_X = {'W': {'LDX', 'TAX', 'TSX'}, 'R': ('X',)}
 
 
+def module_files():
+    """the PRG source files in ROM order (the .include lines of src/main.asm)"""
+    inc = re.findall(r'^\.include "(prg/[^"]+)"', open(os.path.join(ROOT, 'src', 'main.asm'), encoding='utf-8').read(), re.M)
+    return [os.path.join(ROOT, 'src', p) for p in inc]
+
+
 class Prog:
     def __init__(self):
         self.ins = []                # (mnemonic, operand, file, line)
@@ -42,7 +48,7 @@ class Prog:
         self.routines = set()
 
     def load(self):
-        for path in sorted(glob.glob(os.path.join(ROOT, 'src', 'prg', '*_bank.asm'))):
+        for path in module_files():
             scope = os.path.basename(path)
             for n, line in enumerate(open(path, encoding='utf-8'), 1):
                 line = line.rstrip('\n')

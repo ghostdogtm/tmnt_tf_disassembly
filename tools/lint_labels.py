@@ -22,6 +22,19 @@ RANGE_KINDS = ('code', 'data', 'words', 'rtswords', 'table', 'text', 'screens', 
 OTHER = ('split', 'imm', 'note', 'bitskip', 'entry', 'module', 'ref', 'alias', 'bank', 'rawsym', 'bankcall', 'dispatch', 'soundptrs', 'framenames')
 
 
+def starts_with_label(i, name):
+    """a module start without a rom.txt label is fine when a decoder (sound, text ...) put a label there: the generated
+    source file (written by the last build) then begins with it"""
+    f = os.path.join(os.path.dirname(HERE), 'src', 'prg', '%02X_%s.asm' % (d.bank_of(i), name))
+    if not os.path.exists(f):
+        return False
+    for line in open(f, encoding='utf-8'):
+        t = line.strip()
+        if t and not t.startswith(';') and not t.startswith('.segment'):
+            return re.match(r'[A-Za-z_]\w*:', t) is not None
+    return False
+
+
 def lint_rom(path, errs):
     names, places, ranges, modules = {}, {}, [], {}
     if not os.path.exists(path):
@@ -66,7 +79,7 @@ def lint_rom(path, errs):
         except (ValueError, IndexError) as e:
             errs.append('%s:%d: cannot parse %r (%s)' % (path, ln, line.strip(), e))
     for (b, n), i in modules.items():
-        if i % d.BANK and i not in places:
+        if i % d.BANK and i not in places and not starts_with_label(i, n):
             errs.append('%s: module %s starts at %s, which has no label' % (path, n, d.where(i)))
     return set(names)
 
