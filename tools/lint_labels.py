@@ -25,7 +25,7 @@ OTHER = ('split', 'imm', 'note', 'bitskip', 'entry', 'module', 'ref', 'alias', '
 def starts_with_label(i, name):
     """a module start without a rom.txt label is fine when a decoder (sound, text ...) put a label there: the generated
     source file (written by the last build) then begins with it"""
-    f = os.path.join(os.path.dirname(HERE), 'src', 'prg', '%02X_%s.asm' % (d.bank_of(i), name))
+    f = os.path.join(os.path.dirname(HERE), 'src', 'prg', d.module_file(d.bank_of(i), name) + '.asm')
     if not os.path.exists(f):
         return False
     for line in open(f, encoding='utf-8'):
@@ -53,7 +53,7 @@ def lint_rom(path, errs):
                 ranges.append((lo, hi, w, ln))
             elif w == 'module':
                 i, n = d.loc(parts[1]), parts[2]
-                if not re.match(r'^[a-z][a-z0-9_]*$', n):
+                if not re.match(r'^([a-z][a-z0-9_]*/)?[a-z][a-z0-9_]*$', n):
                     errs.append('%s:%d: module name %s must be lower case' % (path, ln, n))
                 if (d.bank_of(i), n) in modules or i in modules.values():
                     errs.append('%s:%d: module %s / %s defined twice' % (path, ln, n, parts[1]))

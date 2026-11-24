@@ -69,7 +69,8 @@ python tools/disasm.py --build
 
 ```
 src/main.asm             підключає все в порядку банків             (генерується)
-src/prg/BB_name.asm      по файлу на модуль (84 файли, 8 КБ банки розбито за змістом; docs/modules.md)  (генерується)
+src/prg/<тека>/BB_name.asm по файлу на модуль (84 файли в sound/ fighters/ frames/ ai/ screens/ fight/ engine/;
+                         8 КБ банки розбито за змістом; docs/modules.md)  (генерується)
 src/chr.asm, src/chr/    CHR ROM: 16 файлів .incbin по 8 КБ         (генерується, chr/ не в git)
 src/defines.inc          регістри заліза, сирі символи              (генерується)
 src/ram.inc              імена RAM                                  (з tools/labels/ram.txt)

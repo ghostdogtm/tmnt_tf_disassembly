@@ -70,7 +70,8 @@ to print a character in the console.
 
 ```
 src/main.asm             includes everything in bank order          (generated)
-src/prg/BB_name.asm      one file per module (84 files, 8 KB banks split by subject; docs/modules.md)  (generated)
+src/prg/<dir>/BB_name.asm one file per module (84 files in sound/ fighters/ frames/ ai/ screens/ fight/ engine/;
+                         8 KB banks split by subject; docs/modules.md)  (generated)
 src/chr.asm, src/chr/    CHR ROM as 16 .incbin files of 8 KB        (generated, chr/ not in git)
 src/defines.inc          hardware registers, unresolved raw symbols (generated)
 src/ram.inc              RAM names                                  (generated from tools/labels/ram.txt)
