@@ -1,0 +1,2477 @@
+; Constants for tools/disasm.py (format: tools/disasm.py, load_consts). @var binds a constant to a RAM variable.
+
+enum ; game modes (gameMode)
+MODE_TITLE = $00 @gameMode
+MODE_DEMO = $01 @gameMode
+MODE_GAME_INIT = $02 @gameMode ; clears the screen and game RAM (ModeGameInit), then MODE_GAME_INIT + 1 sets playerLevel
+MODE_GAME = $04 @gameMode ; player select and fights
+MODE_KONAMI = $05 @gameMode
+MODE_LEGAL = $06 @gameMode
+MODE_OPTION = $07 @gameMode
+MODE_INTRO = $0A @gameMode
+MODE_ENDING = $0B @gameMode ; the ending after the last Story fight (E79C)
+MODE_RANKING = $0C @gameMode ; RunGameMode entry 12 = FarCall0C9FBF = RankingScreen (Mesen: poking $0C shows the high-score ranking)
+endenum
+
+enum ; title menu choices (gameType)
+GAME_STORY = 0 @gameType
+GAME_VS_PLAYER = 1 @gameType
+GAME_VS_CPU = 2 @gameType
+GAME_TOURNAMENT = 3 @gameType
+GAME_OPTION = 4 @gameType
+endenum
+
+; joypad bits as stored by UpdateJoypadState
+BTN_A = $80 @joyPressed @joyPressed+1 @joyHeld @joyHeld+1 @joyPressedAny @joyHeldAny
+BTN_B = $40 @joyPressed @joyPressed+1 @joyHeld @joyHeld+1 @joyPressedAny @joyHeldAny
+BTN_SELECT = $20 @joyPressed @joyPressed+1 @joyHeld @joyHeld+1 @joyPressedAny @joyHeldAny
+BTN_START = $10 @joyPressed @joyPressed+1 @joyHeld @joyHeld+1 @joyPressedAny @joyHeldAny
+BTN_UP = $08 @joyPressed @joyPressed+1 @joyHeld @joyHeld+1 @joyPressedAny @joyHeldAny
+BTN_DOWN = $04 @joyPressed @joyPressed+1 @joyHeld @joyHeld+1 @joyPressedAny @joyHeldAny
+BTN_LEFT = $02 @joyPressed @joyPressed+1 @joyHeld @joyHeld+1 @joyPressedAny @joyHeldAny
+BTN_RIGHT = $01 @joyPressed @joyPressed+1 @joyHeld @joyHeld+1 @joyPressedAny @joyHeldAny
+
+FLOOR_Y = $B0 ; objY of a fighter standing on the floor
+HP_FULL = $B0 @fighterHp @fighterHp+1 ; fighter health at the start of a round
+ROUNDS_TO_WIN = 2 @roundsWon @roundsWon+1
+SLOT_COUNT = $10 ; object slots (obj* arrays)
+
+; immediates passed in A to SetGameMode
+use F4A2 0C:904D MODE_GAME_INIT
+use F564 F5D3 0C:93B2 MODE_TITLE
+use F595 0D:A0CE MODE_KONAMI
+use F55F MODE_INTRO
+use E79C MODE_ENDING
+; button combinations
+use E4FF E832 BTN_A|BTN_B|BTN_UP
+use F50B F4BB BTN_START|BTN_SELECT
+use F3FC BTN_UP|BTN_DOWN
+use D72F SLOT_COUNT
+use D769 FLOOR_Y
+BTNS_DPAD = BTN_UP|BTN_DOWN|BTN_LEFT|BTN_RIGHT
+use 02:8013 02:8106 02:81E6 02:8297 02:893D 02:9A3E 03:AAE5 03:BA9D 03:BAC8 0A:884A 0A:885A 0C:892C 0C:894E BTN_LEFT|BTN_RIGHT
+use 02:81CC 02:8609 02:873A 02:9B41 02:9D5F 0C:86A4 BTN_A|BTN_B
+use 02:99FC 02:9E40 0C:8DD7 0C:8E01 BTNS_DPAD
+use 02:9A48 02:9DF5 02:9DFF BTN_DOWN
+use 0C:80B3 0C:90A3 0C:9FC3 BTN_START|BTN_SELECT
+use 0C:891B D332 BTN_UP|BTN_DOWN
+use 0C:8D20 0C:8F73 BTN_A|BTN_START
+use 0C:8DC2 BTN_START
+use 0D:A495 BTN_SELECT|BTN_UP|BTN_DOWN
+
+; sound ids (PlaySound / StopSoundAndPlay). Ranges from the driver (SoundStart); single ids named by where they are
+; played in Mesen runs (tmp/snd), not by ear
+SND_MUSIC = $2E ; first music id (ids below: sound effects)
+SND_SAMPLE = $47 ; first DPCM sample id (PlaySample)
+SND_FADE_OUT = $5B ; fade the music out (FadeOutMusic)
+SND_JUMP = $07
+SND_SHOT = $15 ; projectile thrown (StateShot)
+SND_HOLD_HIT = $17 ; every hit of a hold (FST_HOLD), ~21 frames apart
+SND_THROW = $1C ; end of a hold
+SND_TITLE = $24 ; title screen appears
+SND_CURSOR = $25 ; menu cursor moved (title, option, select)
+SND_OPTION_CHANGE = $27 ; option value changed (TIMER row)
+SND_START = $29 ; menu choice confirmed, challenger joins
+MUS_SCORES = $38 ; continue (0C:8627), name entry (0C:8CBF) and ranking (0D:A07B) screens (Mesen: mode $0C plays it from the ranking)
+MUS_GAME_OVER = $39 ; game over screen (PlaySound from F745 at frame 11784, Mesen)
+MUS_SEWER = $2E ; fight music of the sewer arena (StageMusic)
+MUS_DOWNTOWN = $2F
+MUS_SHIP = $30 ; pirate ship
+MUS_WATERFRONT = $31
+MUS_PRE_FIGHT = $32 ; played while the VS screen is up (PlaySound from E2DA in FightVsScreen, Mesen)
+MUS_SEWER_HURRY = $33 ; same arena when the timer is nearly out (StageMusicHurry)
+MUS_DOWNTOWN_HURRY = $34
+MUS_SHIP_HURRY = $35
+MUS_WATERFRONT_HURRY = $36
+MUS_SELECT = $37 ; player select (PlaySound from 06:813B at frame 5484, Mesen)
+MUS_INTRO1 = $3A ; intro, first part (Konami logo follows the title order)
+MUS_INTRO2 = $3B
+MUS_INTRO3 = $3C
+SND_SELECT_VOICE = $53 ; sample at the player select confirm (PlaySound from 06:8173 at frame 5530, Mesen)
+SND_FIGHT_VOICE = $51 ; sample when the round starts (PhaseIntro)
+use E522 F431 SND_START
+use F423 SND_CURSOR
+use 00:8E99 00:8FD6 00:8FEB 00:9029 SND_MUSIC
+use 00:8FFA 00:8692 SND_SAMPLE
+use 00:8FF6 00:9047 SND_FADE_OUT
+use F3EA SND_TITLE
+use 06:822A 0C:80CF 0C:8B69 0C:8D34 0C:8E65 0D:A4A1 SND_CURSOR
+use 0C:8988 0C:8FE8 0D:A4CC SND_START
+use 02:8560 SND_JUMP
+use 02:90ED SND_HOLD_HIT
+use 02:908B 02:9136 SND_THROW
+use 02:84C7 SND_SHOT
+use 02:816F SND_FIGHT_VOICE
+use 0C:90E3 MUS_INTRO1
+use 0C:9166 MUS_INTRO2
+use 0C:91D3 MUS_INTRO3
+use E2D5 MUS_PRE_FIGHT
+use 06:8136 MUS_SELECT
+use 0C:91BA 0C:9930 0C:9C0D 0D:A0AB E4E8 SND_FADE_OUT
+
+; fight sub-states (modeSubState while gameMode = MODE_GAME), table at E18C; only the verified ones
+FS_ROUND = $07 ; FightRoundRunning
+FS_LOST = $0D ; Story match lost: continue screen follows
+FS_CHALLENGER = $13 ; second player joined (ChallengerJoins)
+FS_CHALLENGER_CARD_B = $1F ; Story match lost from stage 6 on (StoryMatchLost): FightChallengerCardB (music $45, the Shredder card), then FS_SHREDDER_WINS ($20, text 6), then FS_LOST (Mesen: storyStage 6, P1 HP 1: $0A -> $1F -> $20 -> $0D)
+use E527 FS_CHALLENGER
+use E68A FS_LOST
+use E687 FS_CHALLENGER_CARD_B
+use E117 FS_ROUND
+
+enum ; fighter phase (objPhase of slots 0/1), handled by FighterPhase
+PHASE_SPAWN = 0 ; place at the start position, full health
+PHASE_READY = 1 ; one frame: sets the intro timer
+PHASE_INTRO = 2 @objPhase ; waiting for the round to start
+PHASE_FIGHT = 3 @objPhase ; objState runs
+PHASE_KO = 4 @objPhase ; knocked out / round lost (objState = step)
+endenum
+
+enum ; fighter action state (objState while PHASE_FIGHT), handled by FighterState
+FST_STAND = 0 ; on the floor: walk, turn, read buttons
+FST_JUMP = 1
+FST_SHOT = 2 @objState ; crouch pose, then throws the ball (object slot 6: ballOwner, fighterHasBall, SND_SHOT); Down held: FST_CROUCH, else stand
+FST_HURT = 3 @objState ; hit reaction, kind in objHitType
+FST_KNOCKDOWN = 4 @objState ; thrown up, falls, lies, gets up (buttons speed it up)
+FST_SPECIAL = 5 @objState ; animated special move (SpecialScriptStart / SpecialFxFrames); its effect object is slot $0C + fighter
+FST_TURN = 6 @objState ; turns round to face the opponent
+FST_CROUCH = 7 @objState
+FST_CHAR_MOVE = 8 @objState ; per-character move (jump table on objSpriteSet)
+FST_HOLD = 9 @objState ; holds the opponent (throw / repeated hits)
+FST_HELD = $0A @objState ; held by the opponent, loses health on each hit
+FST_0B = $0B @objState ; caught in the opponent's character move (State0B: blinking frame, SND_STATE_0B, not pushed apart by SeparateFighters; ShredderBoltsWait waits for it); back to air hurt when the opponent's FST_CHAR_MOVE step ends; not seen in the Mesen runs
+FST_WIN = $0C @objState ; victory pose and voice
+endenum
+
+enum ; characters (fighterChar, objSpriteSet of the fighters)
+CHAR_LEO = 0
+CHAR_RAPH = 1
+CHAR_MIKE = 2 ; order of FighterNames / FighterNamesHud (indexed by fighterChar in DrawFighterNames)
+CHAR_DON = 3
+CHAR_CASEY = 4
+CHAR_HOTHEAD = 5
+CHAR_SHREDDER = 6
+endenum
+; bank 0C (select screen) reuses slot 0 objPhase with its own values: keep them numeric
+; more fight sub-states (seen in Mesen: tmp/fs) 
+FS_VS_SCREEN = $03 ; the VS screen (SCR_VS: fighter names, tournament names, MUS_PRE_FIGHT) while the FIGHT_VS_SCREEN_TIME timer runs; clears roundsWon / roundCounter
+FS_ROUND_SETUP = $05 ; one frame: next round
+FS_ROUND_OVER = $08 ; one frame: a fighter is knocked out (or time is up)
+FS_KO_PAUSE = $09 ; "CPU WIN" / winner pose shown
+FS_MATCH_OVER = $0A ; roundsWon vs ROUNDS_TO_WIN, then by gameType (story / VS / tournament): next stage, end cards or the winner
+use E246 FS_VS_SCREEN
+use E5B9 FS_ROUND_SETUP
+use E737 FS_ROUND_OVER
+use E4E4 FS_MATCH_OVER
+
+; PPU update queue records (ppuQueue): command, PPU address low, high, then
+PPUQ_END = $00 ; end of the queue
+PPUQ_ROW = $01 ; tiles left to right until PPUQ_STOP
+PPUQ_COLUMN = $02 ; tiles top to bottom (PPUCTRL +32) until PPUQ_STOP
+PPUQ_FILL = $03 ; count, tile: the same tile count times
+PPUQ_SEQ = $04 ; count, first tile: tile, tile+1, ...
+PPUQ_FILL_COLUMN = $05 ; count, tile, top to bottom
+PPUQ_COUNT = $06 ; first value that is not a command: $FF followed by >= PPUQ_COUNT is a literal $FF tile
+PPUQ_STOP = $FF ; ends the tiles of PPUQ_ROW / PPUQ_COLUMN
+PPUCTRL_INC32 = $04 ; PPUCTRL bit 2: PPUDATA steps 32 (down a column)
+TEXT_NEXT = $FE ; DrawText: a new PPU address follows
+TEXT_END = $FF ; DrawText: end of the string
+data 08:8001 0, PPUCTRL_INC32, 0, 0, PPUCTRL_INC32 ; PpuQueueCtrl: commands 1-5
+use F26C PPUQ_END
+use 08:808A D26C D54A D558 PPUQ_ROW
+use 03:BED8 EB09 PPUQ_COLUMN
+use 06:82D4 PPUQ_FILL
+use 08:8029 PPUQ_FILL
+use 08:802F PPUQ_FILL_COLUMN
+use 08:804D PPUQ_COUNT
+use 08:8046 D25B PPUQ_STOP
+use 08:80A2 TEXT_NEXT
+use 08:809E TEXT_END
+
+enum ; option screen rows (optionRow)
+OPT_DIFFICULTY = 0
+OPT_BGM = 1
+OPT_SPEED = 2
+OPT_TIMER = 3
+OPT_EXIT = 4
+OPT_COUNT = 5
+endenum
+DIFFICULTY_HARD = 2 ; difficulty: 0 easy, 1 normal, 2 hard
+TIMER_SETTINGS = 4 ; timerSetting values
+BGM_TEST_LAST = $11 ; last bgmTestNum (BgmTestIds has 18 entries)
+use 0C:80C2 0C:80E8 OPT_EXIT
+use 0C:80E0 OPT_COUNT
+use 0C:8117 DIFFICULTY_HARD
+use 0C:8149 BGM_TEST_LAST
+use 0C:816E TIMER_SETTINGS
+use 0C:8175 SND_OPTION_CHANGE
+use 0C:80BB 0C:8121 BTN_A|BTN_B
+use 0C:80CA BTN_UP|BTN_DOWN
+use 0C:80F2 0C:815D BTN_A|BTN_B|BTN_LEFT|BTN_RIGHT
+use 0C:8105 BTN_A|BTN_RIGHT
+use 0C:8163 BTN_B|BTN_LEFT
+use 0C:8627 MUS_SCORES
+use 0C:867C MUS_GAME_OVER
+
+enum ; DrawText strings (TextPtrs); font: 'A' = $8B, '0' = $81, space = 0
+TXT_STORY = 0 ; the title menu: STORY .. OPTION
+TXT_VS_PLAYER = 1
+TXT_VS_CPU = 2
+TXT_TOURNAMENT = 3
+TXT_OPTION = 4
+TXT_GAME_OVER = 5
+TXT_CONTINUE = 6
+TXT_COPYRIGHT = 7 ; (c) KONAMI 1993
+TXT_STORY_8 = 8 ; copy of TXT_STORY
+TXT_EASY = 9 ; option DIFFICULTY: + difficulty
+TXT_NORMAL = $0A
+TXT_HARD = $0B
+TXT_STORY_C = $0C
+TXT_STORY_D = $0D
+TXT_WINNER = $0E
+TXT_PLAYER12 = $0F ; PLAYER1 (nametable 1) / PLAYER2
+TXT_STORY_10 = $10
+TXT_PUSH_START = $11
+TXT_CPU = $12
+TXT_SPEED_NORMAL = $13 ; option SPEED: + gameSpeed
+TXT_SPEED_TURBO = $14
+TXT_BONUS = $15 ; BONUS 00
+TXT_TIME = $16
+TXT_PERFECT = $17
+TXT_LIFE = $18
+TXT_REMATCH = $19
+TXT_END = $1A
+TXT_BONUS_GAME = $1B
+TXT_TIME_BONUS_GAME = $1C
+endenum
+use 0C:8051 TXT_EASY
+use 0C:8090 TXT_SPEED_NORMAL
+use 0C:8617 TXT_CONTINUE
+use 0C:8677 TXT_GAME_OVER
+use 0C:88CA TXT_CPU
+use 0C:8AAE TXT_BONUS
+use 0D:A445 TXT_REMATCH
+use 0D:A44A TXT_END
+use E7A9 TXT_BONUS_GAME
+use E815 TXT_TIME_BONUS_GAME
+use F029 TXT_COPYRIGHT
+use 0C:80D5 BTN_DOWN
+use 0C:8137 BTN_RIGHT
+
+; credits (CreditsText, records in the font charmap: big-endian PPU address, tiles, TEXT_END)
+CREDITS_ERASE = $FE ; + address + TEXT_END: fill CREDITS_LINE_LEN blank tiles there
+CREDITS_END = $FD ; end of the credits (next modeStep)
+CREDITS_LINE_LEN = $15
+use 0C:9981 0C:99AA TEXT_END
+use 0C:998D CREDITS_ERASE
+use 0C:9991 CREDITS_END
+use 0C:99C6 PPUQ_FILL
+use 0C:99CB CREDITS_LINE_LEN
+
+; story text box (RunStoryText): one character every STORY_CHAR_DELAY frames, typed from STORY_BOX + 4
+STORY_WAIT = $BB ; + frames: wait before the next character
+STORY_CLEAR = $BC ; clear the box (StoryClearBox), back to the first line
+STORY_NEWLINE = $BD ; next line (+ NT_WIDTH)
+STORY_EASY_ONLY = $BE ; the rest is shown on EASY only (difficulty 0), else the text ends here
+STORY_FADE_MUSIC = $BF ; SND_FADE_OUT
+STORY_END = $FF
+STORY_CHAR_DELAY = 6
+STORY_BOX = $2280 ; nametable 0 row 20: 4 rows of the text box
+STORY_BOX_SIZE = $80
+NT_WIDTH = 32 ; tiles per nametable row
+use 0C:9B86 STORY_NEWLINE
+use 0C:9B8A STORY_WAIT
+use 0C:9B8E STORY_CLEAR
+use 0C:9B92 STORY_EASY_ONLY
+use 0C:9B96 STORY_FADE_MUSIC
+use 0C:9B9A STORY_END
+use 0C:9B5E STORY_CHAR_DELAY
+use 0C:9B64 <(STORY_BOX+4)
+use 0C:9B69 >(STORY_BOX+4)
+use 0C:9BBD NT_WIDTH
+use 0C:9BEA PPUQ_STOP
+data 0C:9BFA PPUQ_FILL, <STORY_BOX, >STORY_BOX, STORY_BOX_SIZE, 0, PPUQ_STOP
+use EBC8 EBD8 EBEB EBFB TEXT_END
+STXT_MANHATTAN = 0 @storyTextId ; story intro: MANHATTAN....PRESENT DAY.
+STXT_LETTER = 1 @storyTextId ; THE TURTLES RECEIVE A STRANGE LETTER
+STXT_SHREDDER_LETTER = 2 @storyTextId ; the challenge, signed SHREDDER
+STXT_SHREDDER_ESCAPES = 3 @storyTextId ; ending of the Shredder ending (EndingTextId[0]): YOU HAVE NOT SEEN THE LAST OF ME!! (+ on EASY: CHALLENGE THE NORMAL MODE)
+STXT_SPLINTER = 4 @storyTextId ; ending: YOU HAVE PERFORMED WELL, MY SONS
+STXT_SHREDDER_TAUNT = 5 @storyTextId ; before a Story fight from stage 6 on (FS_SHREDDER_TAUNT $1E, after the challenge card $1D; Mesen: storyTextId 5 at frame 5790): YOU MAY HAVE BEATEN ME IN THE PAST
+STXT_SHREDDER_WINS = 6 @storyTextId ; HA! I EXPECTED A TOUGHER OPPONENT (FightShredderWins, then SetModeLost; code read, not seen in play)
+STXT_HARD_MODE = 7 @storyTextId ; after the credits: CHALLENGE THE HARD MODE NEXT TIME!
+data 0C:9951 STXT_SHREDDER_ESCAPES, STXT_SPLINTER
+
+; ---- LoadScreen (docs/screens.md)
+BANK_SEL = $30 ; PushBankA / MapBankPairA: A = BANK_SEL|pair
+SCR_END = $FF ; end of the screen
+SCR_NEXT = $7F ; a new PPU address word follows
+SCR_RUN = $00 ; SCR_RUN|n, tile: n copies of the tile (n = 0: 256)
+SCR_LITERAL = $80 ; SCR_LITERAL|n, n tiles
+SCR_SEQUENCE = $C0 ; SCR_SEQUENCE|n, tile: tile, tile+1, .. n tiles (n = 0: 256)
+enum ; screens (LoadScreen X = id * 2; ScreenPtrs, ScreenBanks)
+SCR_CLEAR = $00
+SCR_TITLE = $02
+SCR_KONAMI = $04
+SCR_LEGAL = $06
+SCR_STAGE_WATERFRONT = $08
+SCR_STAGE_SEWER = $0A
+SCR_FIGHT_HUD = $0C
+SCR_STAGE_PIRATE_SHIP = $0E
+SCR_PLAYER_SELECT = $10
+SCR_VS_SETUP = $12
+SCR_STAGE_DOWNTOWN = $14
+SCR_TOURNAMENT = $16
+SCR_OPTION = $18
+SCR_SELECT_TURTLES_ONLY = $1A
+SCR_BONUS_GAME = $1C
+SCR_BONUS_LOGO = $1E
+SCR_NAME_ENTRY = $20
+SCR_ENDING_SHREDDER = $22
+SCR_ENDING_TURTLES = $24
+SCR_RANKING = $26
+SCR_VS = $28
+SCR_STORY_MANHATTAN = $2A
+SCR_STORY_LETTER = $2C
+SCR_SPLINTER = $2E
+SCR_PARADE_LEO = $30
+SCR_PARADE_RAPH = $32
+SCR_PARADE_MIKE = $34
+SCR_PARADE_DON = $36
+SCR_PARADE_CASEY = $38
+SCR_PARADE_HOTHEAD = $3A
+endenum
+use 06:810B SCR_PLAYER_SELECT
+use 06:8116 SCR_SELECT_TURTLES_ONLY
+use 0C:8036 SCR_OPTION
+use 0C:82C9 SCR_TOURNAMENT
+use 0C:88AD SCR_VS_SETUP
+use 0C:8C8D SCR_NAME_ENTRY
+use 0C:91F0 SCR_PARADE_LEO
+use 0C:96C6 SCR_STAGE_WATERFRONT
+use 0C:983D SCR_SPLINTER
+use 0C:9FE0 SCR_RANKING
+use E251 SCR_VS
+use E401 SCR_FIGHT_HUD
+use E803 SCR_BONUS_GAME
+use E810 SCR_BONUS_LOGO
+use F00C SCR_TITLE
+use F51C SCR_KONAMI
+use F576 SCR_LEGAL
+data E920 SCR_STAGE_SEWER, SCR_STAGE_DOWNTOWN, SCR_STAGE_SEWER, SCR_STAGE_DOWNTOWN, SCR_STAGE_PIRATE_SHIP, SCR_STAGE_PIRATE_SHIP, SCR_STAGE_WATERFRONT
+data 0C:994D SCR_ENDING_SHREDDER, SCR_ENDING_TURTLES
+data F121 BANK_SEL|0, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|0, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6, BANK_SEL|6
+
+; ---- metasprites (DrawMetasprite, docs/fighters.md)
+MSPR_JUMP = $80 ; in place of a sprite's Y offset: the rest of the frame is at the address that follows
+OAM_FLIP_V = $80 @objFlip ; OAM attributes
+OAM_FLIP_H = $40 @objFlip
+OAM_BEHIND = $20
+GRAVITY = $50 ; StateJump: + CharGravity
+use 02:85E5 GRAVITY
+
+; animations (RunAnim Y = id; AnimOffsets)
+ANIM_WIN = $04 ; + CHAR_*: win animation
+ANIM_LOSE = $13 ; + CHAR_*: animation of the loser
+use E717 02:88EE ANIM_WIN
+use E72E ANIM_LOSE
+data DFE6 0, Anim01-AnimData, Anim02-AnimData, Anim03-AnimData, AnimWinLeo-AnimData, AnimWinRaph-AnimData, AnimWinMikeDon-AnimData, AnimWinMikeDon-AnimData, AnimWinCasey-AnimData, AnimWinHothead-AnimData, AnimWinShredder-AnimData, Anim0B-AnimData, Anim0C-AnimData, Anim0D-AnimData, AnimIdleTurtles-AnimData, AnimIdleCasey-AnimData, AnimIdleHothead-AnimData, AnimIdleShredder-AnimData, Anim12-AnimData, AnimLoseTurtles-AnimData, AnimLoseTurtles-AnimData, AnimLoseTurtles-AnimData, AnimLoseTurtles-AnimData, AnimLoseCasey-AnimData, AnimLoseHothead-AnimData, AnimLoseShredder-AnimData
+ANIM_IDLE_TURTLES = $0E
+ANIM_IDLE_CASEY = $0F
+ANIM_IDLE_HOTHEAD = $10
+ANIM_IDLE_SHREDDER = $11
+data DF41 ANIM_IDLE_TURTLES, ANIM_IDLE_TURTLES, ANIM_IDLE_TURTLES, ANIM_IDLE_TURTLES, ANIM_IDLE_CASEY, ANIM_IDLE_HOTHEAD, ANIM_IDLE_SHREDDER
+
+; move scripts (movescripts in rom.txt): (frame, frames) pairs played in order, and these control bytes
+MOVE_END = $00
+MOVE_SOUND = $FE ; + sound id
+MOVE_HIT = $FF ; + attack id: start the attack object (slot fighter+2)
+
+; attack ids of the special-move objects (objSpriteSet of slots 2-5, AttackPhasePtrs); $01-$2E come from move scripts
+ATK_HOTHEAD_FIRE = $2F
+ATK_SHREDDER_WAVE = $30
+ATK_LEO_SPIN = $31
+ATK_RAPH_ROLL = $32
+ATK_MIKE_KICK_A = $33
+ATK_MIKE_KICK_B = $34
+ATK_DON = $35
+ATK_SHREDDER_BOLT = $36
+ATK_CASEY_KICK = $37
+ATK_DON_2 = $38
+ATK_CASEY_RAIN = $39
+use 03:B387 ATK_LEO_SPIN
+use 03:B4F6 ATK_RAPH_ROLL
+use 03:B6A2 ATK_DON
+use 03:B729 ATK_DON_2
+use 03:B76A ATK_SHREDDER_BOLT
+use 03:B89B ATK_CASEY_KICK
+use 03:B910 ATK_HOTHEAD_FIRE
+use 03:B95B ATK_SHREDDER_WAVE
+use 03:B9EE ATK_CASEY_RAIN
+use 03:A418 ATK_SHREDDER_WAVE
+use 03:A41C ATK_HOTHEAD_FIRE
+data 03:BA38 ATK_MIKE_KICK_B, 0, ATK_MIKE_KICK_A
+
+; CPU AI (docs/ai.md)
+AI_STEP_NEXT = 0 ; read the next script byte
+AI_STEP_HOLD = 1 @aiStep ; keep the pad for aiHoldTimer frames
+AI_STEP_TIMED = 2 @aiStep ; keep the pad for aiPadTimer frames, then release it
+AI_STEP_WAIT = 3 @aiStep ; run the aiCond condition every frame until it is met
+AI_MODE_INIT = 0
+AI_MODE_CHOOSE = 1 @aiMode
+AI_MODE_RUN = 2 @aiMode
+AI_ACTION_NONE = $FF @aiAction
+AI_ACTIONS = $46 ; action ids $00-$45 (AiScriptPtrs); a larger id becomes AIA_IDLE
+; action scripts (aiscripts in rom.txt): bytes below $D0 are pad bits (BTN_*), pressed for one byte; the rest:
+AI_END = $FF ; end of the action (aiLocked = 0, AiResetState)
+AI_HOLD = $FC ; keep the pad as it is (AI_STEP_HOLD with aiHoldTimer = 0)
+AI_RELEASE = $D9 ; release all buttons
+AI_WAIT = $FD ; + AIC_* condition: wait until it is met
+AI_PAUSE = $D4 ; keep the pad for AiHoldTimes[character*4 + difficulty] frames (0 = no pause)
+AI_CHARGE = $FE ; hold back until the charge is full (AIC_CHARGE)
+AI_CHARGE2 = $D3 ; same with AIC_CHARGE2 (aiCond = AIC_CHARGE2, AI_STEP_WAIT)
+AI_RUN = $D5 ; keep only left/right and start a dash as if forward had been tapped twice
+AI_TAP_B = $DD ; press B (one per frame; aiTapCount++)
+AI_LOCK = $DA ; the action may not be interrupted
+AI_UNLOCK = $DB
+AI_WALK_GAP = $DC ; + gap: walk until fighterGap = gap (+-1) (AIC_WALK_GAP)
+AI_WALK_RANGE = $D6 ; + n: walk until fighterGap = aiRanges[fighter*4 + n] (AIC_WALK_GAP)
+AI_WAIT_SUB = $D7 ; + n: AIC_SUB condition n
+AI_GOTO = $D8 ; + action: start that action now
+; directions relative to the target (AiTranslateByte, aiTargetDx): forward = toward the target
+AI_FWD = $DE
+AI_BACK = $DF
+AI_FWD_UP = $F0
+AI_BACK_UP = $F1
+AI_FWD_DOWN = $F2
+AI_BACK_DOWN = $F3
+AI_TO_BALL = $F4 ; the direction bit toward the ball (aiBallDx)
+AI_FROM_BALL = $F5 ; the direction bit away from the ball (aiBallDx)
+AI_FWD_A = $F6
+AI_FWD_B = $F7
+AI_INCLUDE = $F8 ; $F8-$FB: AiIncludeScript (unused, would index AiScriptPtrs with $F0-$F6)
+; conditions (aiCond, AiCondPtrs): the routine ends the wait (AiCondDone) or keeps the pad (AiCondKeep)
+AIC_WATCH = $00 ; wait a few frames (AiWatchCounts by difficulty) while the target does nothing dangerous
+AIC_CLOSING = $01 ; keep going while there is room, the gap is closing and the target is not far
+AIC_WALK_IN = $02 ; walk forward while the target is not close
+AIC_WALK_CLOSE = $03 ; walk forward until range class 0 (gap >= 9 and target not knocked out)
+AIC_DOWN_TAP = $04 ; press down, then replay the next script byte for 5 frames
+AIC_PRESS_B = $05 ; when standing: press B and keep it for $30 frames (AI_STEP_TIMED)
+AIC_WALK_TO_BALL = $06 ; walk while the ball is free and more than 6 pixels away
+AIC_HEIGHT = $07 ; wait until the target's height is within AiTargetHeight[target]
+AIC_DOWN_ATTACK = $08 ; AIC_DOWN_TAP, then wait for the attack to start and end
+AIC_ATTACK_END = $09 ; wait while fighterAttacking
+AIC_WALK_GAP = $0A ; walk until fighterGap = aiCondArg +-1 (stops at the walls)
+AIC_WALK_FAR = $0B ; AIC_WALK_CLOSE, only when no up/down is held and the target is far (class 3)
+AIC_LAND_A = $0C ; wait to land and stand, then press A
+AIC_WATCH_DON = $0D ; AIC_WATCH; against Don doing a move: switch to AIC_DON
+AIC_STOP = $0E ; wait while in the air or moving
+AIC_LAND = $0F ; release up/down/B; wait to land
+AIC_B_STANDING = $10 ; unless crouching: press B and keep it $30 frames
+AIC_SHOT = $11 ; wait while the opponent's ball shot flies
+AIC_STOP_MOVING = $12 ; on the ground: release and wait for velocity 0
+AIC_TARGET_HURT = $13 ; wait while the target is hurt (if there is room and it does not attack / jump)
+AIC_HOLD_B = $14 ; press and keep B unless the target is hurt or we jump
+AIC_SUB = $15 ; AiCondSubPtrs[aiCondArg] (AI_WAIT_SUB)
+AIC_B_NOW = $16 ; standing: press B; otherwise wait
+AIC_CHARGE = $17 ; hold back until specialTimer > chargeTime (AI_CHARGE)
+AIC_CHARGE2 = $18 ; AI_CHARGE2 variant of AIC_CHARGE: specialTimer vs chargeTime with range/gap tests
+AIC_DON = $19 ; used against Don (AIC_WATCH_DON)
+; action ids (aiAction, AiScriptPtrs; returned by AiDecide*, $17 of AiReact*): named after their script
+AIA_NONE = $00 ; empty script
+AIA_BACK_WATCH = $01 ; back, watch, back
+AIA_GUARD_LOW = $02 ; watch, then down-back
+AIA_WALK_RANGE2 = $03 ; walk to the class-2 gap
+AIA_BACK_WATCH_B = $04 ; back, watch, B, back
+AIA_DASH_BACK = $05 ; dash backward while the gap closes
+AIA_DASH_BACK_JUMP = $06 ; dash backward, jump back, come down with down-back
+AIA_WALK_IN_B = $07 ; walk in close, pause, B, back
+AIA_GUARD_SHOT = $08 ; wait for the ball shot to pass, back
+AIA_WALK_BACK = $09 ; walk backward while the gap closes
+AIA_WALK_RANGE1 = $0A ; walk to the class-1 gap
+AIA_JUMP_DOWN = $0B ; jump forward, then down at the target's height
+AIA_DASH_JUMP_DOWN = $0C ; dash, then AIA_JUMP_DOWN
+AIA_DASH_IN = $0D ; dash in
+AIA_DASH_FROM_BALL = $0E ; dash away from the ball
+AIA_GET_BALL = $0F ; dash to the ball (AIC_WALK_TO_BALL), then AIC_DOWN_TAP: down, B
+AIA_B = $10
+AIA_DOWN_B = $11 ; crouch, down + B
+AIA_JUMP_FWD = $12
+AIA_DASH_B = $13 ; dash in, forward + B
+AIA_DASH_DOWN_B = $14 ; dash in close, crouch, down + B
+AIA_DASH_JUMP = $15 ; dash, jump forward
+AIA_BALL_SPECIAL_B = $16 ; down, down-forward, forward, then B (AIC_PRESS_B): the ball command
+AIA_A = $17
+AIA_JUMP_JUMP_A = $18 ; two forward jumps, A
+AIA_DOWN_BACK_A = $19 ; crouch, down-back + A
+AIA_DASH_A = $1A ; dash in, forward + A
+AIA_DASH_DOWN_A = $1B ; dash in, crouch, down + A
+AIA_DASH_FAR_JUMP = $1C ; walk, dash from far, jump forward
+AIA_CASEY_KICK = $1D ; charge down-back, up + B (CaseyJumpKick)
+AIA_DON_SPIN = $1E ; charge, down, up + A (DonSpecial)
+AIA_RAPH_ROLL = $1F ; charge back, forward + B (RaphSpecial)
+AIA_LEO_SPIN = $20 ; down, down-back, back + A (LeoSpecial)
+AIA_MIKE_KICK_A = $21 ; charge down-back, forward + A (MikeSpecial)
+AIA_MIKE_KICK_B = $22 ; charge down-back, forward + B
+AIA_HOTHEAD_FIRE = $23 ; down, down-forward, forward + A (HotheadSpecial)
+AIA_SHREDDER_BOLTS = $24 ; B tapped 4 times (ShredderBolts), with sub-conditions
+AIA_SHREDDER_WAVE = $25 ; forward, down-forward, down + B (ShredderWave)
+AIA_A_X4 = $26 ; A four times
+AIA_B_B_A_B = $27
+AIA_WATCH_FWD_B = $28 ; watch, down-back, forward + B
+AIA_DOWN_A_X2 = $29 ; crouch, down + A, twice
+AIA_DOWN_A_LEO_SPIN = $2A ; crouch, down + A, then AIA_LEO_SPIN
+AIA_WATCH_MIKE_KICK_A = $2B ; watch, charge, forward + A, then AIA_WALK_IN_B
+AIA_CROUCH_B = $2C ; down, B when standing, down
+AIA_GAP48_JUMP = $2D ; walk to gap $48, jump forward
+AIA_BALL_SPECIAL_A = $2E ; down, down-forward, forward, wait to land (AIC_LAND_A), then A: the ball command (Mike)
+AIA_WATCH_DASH_A = $2F ; watch, down-back, then AIA_DASH_A
+AIA_BACK_CASEY_RAIN = $30 ; back, watch, back, then AIA_CASEY_RAIN
+AIA_GAP48_JUMP_2 = $31 ; same script as AIA_GAP48_JUMP
+AIA_HOTHEAD_FIRE_IN = $32 ; AIA_HOTHEAD_FIRE, then AIA_WALK_IN_B
+AIA_GAP48_WAVE = $33 ; walk to gap $48, then AIA_SHREDDER_WAVE
+AIA_DASH_COMBO = $34 ; walk to gap $35, dash attacks while the target is hurt, then AIA_DASH_COMBO_A
+AIA_DASH_COMBO_A = $35 ; dash, A while the target is hurt, repeat
+AIA_BACK_FWD_HOLD = $36 ; back, forward, AICS 1 hold
+AIA_WALK_IN_B_BACK = $37 ; AIA_WALK_IN_B, then walk to gap $50
+AIA_DASH_JUMP_A = $38 ; dash, forward + A, then AIA_DASH_BACK_JUMP
+AIA_BACK_LOOP = $39 ; back, AICS 3, repeat
+AIA_CASEY_RAIN = $3A ; forward, down-forward, down, down-back, back, then hold B (AIC_HOLD_B) (CaseyRain)
+AIA_WATCH_BACK_FWD_B = $3B ; watch, back, forward + B
+AIA_SUB3 = $3C ; AICS 3 only
+AIA_WATCH_DASH_B = $3D ; watch, dash from far, forward + B, then AIA_WALK_IN_B
+AIA_STAND = $3E ; 9 frames with no buttons
+AIA_WATCH_RAPH_ROLL = $3F ; watch, then charge back, forward + B
+AIA_DASH_IN_B = $40 ; dash in close, pause, B, back, then AIA_WALK_IN_B
+AIA_IDLE = $41 ; one frame with no buttons (AiSetAction uses it for ids >= AI_ACTIONS)
+AIA_TAP_B_X4 = $42 ; B tapped 4 times (Shredder bolts)
+AIA_HEIGHT_RAPH_ROLL = $43 ; back until the target's height, forward + B
+AIA_SUB8 = $44 ; AICS 8 only
+AIA_GAP68_WAVE = $45 ; walk to gap $68, then AIA_SHREDDER_WAVE
+use 0A:8180 AI_ACTIONS
+use 0A:818F AIA_IDLE
+; AI decision routines: actions returned (LDA #id / RTS) and random action tables
+data 0A:8E69 AIA_DASH_JUMP_DOWN, AIA_DOWN_BACK_A, AIA_DOWN_B, AIA_DASH_BACK_JUMP, AIA_DASH_BACK, AIA_LEO_SPIN, AIA_DASH_JUMP, AIA_WALK_RANGE2
+data 0A:907D AIA_DASH_B, AIA_DASH_DOWN_B, AIA_DASH_JUMP, AIA_DASH_A, AIA_DASH_DOWN_A, AIA_DASH_FAR_JUMP, AIA_DASH_B, AIA_DASH_A
+data 0A:909F AIA_JUMP_DOWN, AIA_DASH_JUMP_DOWN, AIA_DASH_BACK, AIA_DASH_BACK_JUMP
+data 0A:90AC AIA_B, AIA_A, AIA_JUMP_FWD, AIA_LEO_SPIN, AIA_DASH_B, AIA_WALK_IN_B_BACK, AIA_JUMP_FWD, AIA_LEO_SPIN
+data 0A:90B4 AIA_A, AIA_TAP_B_X4, AIA_DASH_A, AIA_DASH_B, AIA_WALK_IN_B, AIA_DASH_COMBO, AIA_LEO_SPIN, AIA_WALK_RANGE2
+data 0A:9219 AIA_DASH_A, AIA_DASH_B, AIA_WALK_IN_B, AIA_RAPH_ROLL
+data 0A:9278 AIA_JUMP_FWD, AIA_DOWN_A_X2, AIA_JUMP_JUMP_A, AIA_DASH_B
+data 0A:927C AIA_DASH_IN, AIA_JUMP_DOWN, AIA_DASH_JUMP_DOWN, AIA_DASH_B, AIA_DASH_DOWN_B, AIA_DASH_JUMP, AIA_DASH_A, AIA_DASH_DOWN_A
+data 0A:9284 AIA_DASH_FAR_JUMP, AIA_DASH_JUMP, AIA_JUMP_FWD, AIA_JUMP_JUMP_A
+data 0A:9288 AIA_STAND, AIA_IDLE, AIA_WALK_IN_B_BACK, AIA_DASH_A, AIA_B, AIA_DASH_COMBO, AIA_DOWN_A_X2, AIA_A_X4
+data 0A:9290 AIA_DOWN_A_X2, AIA_DOWN_BACK_A, AIA_B, AIA_A, AIA_TAP_B_X4, AIA_DASH_COMBO, AIA_DOWN_A_X2, AIA_A_X4
+data 0A:9298 AIA_DASH_BACK, AIA_DOWN_A_X2, AIA_DASH_COMBO, AIA_DASH_A
+data 0A:929C AIA_WATCH_RAPH_ROLL, AIA_JUMP_JUMP_A, AIA_B, AIA_A
+data 0A:92F3 AIA_DASH_A, AIA_DOWN_BACK_A, AIA_WALK_IN_B, AIA_DASH_B, AIA_DASH_A, AIA_DOWN_BACK_A, AIA_WALK_IN_B, AIA_DASH_B
+data 0A:93AD AIA_B, AIA_DOWN_B, AIA_DASH_BACK_JUMP, AIA_A, AIA_JUMP_JUMP_A, AIA_WALK_IN_B, AIA_DASH_DOWN_B, AIA_DASH_A
+data 0A:93B5 AIA_DASH_BACK_JUMP, AIA_DASH_IN, AIA_JUMP_DOWN, AIA_DASH_JUMP_DOWN, AIA_DASH_DOWN_B, AIA_DASH_JUMP, AIA_DASH_A, AIA_DASH_DOWN_A
+data 0A:94A3 AIA_WALK_IN_B, AIA_A, AIA_B, AIA_JUMP_JUMP_A
+data 0A:94AE AIA_DOWN_BACK_A, AIA_DOWN_B, AIA_A, AIA_WATCH_MIKE_KICK_A
+data 0A:957B AIA_JUMP_FWD, AIA_B_B_A_B, AIA_JUMP_JUMP_A, AIA_WALK_RANGE2
+data 0A:957F AIA_WALK_BACK, AIA_JUMP_DOWN, AIA_DASH_JUMP_DOWN, AIA_DASH_B, AIA_DASH_DOWN_B, AIA_DASH_JUMP, AIA_DASH_A, AIA_DASH_DOWN_A
+data 0A:9587 AIA_DASH_A, AIA_DASH_JUMP_DOWN, AIA_JUMP_DOWN, AIA_DASH_B, AIA_DASH_DOWN_B, AIA_DASH_JUMP, AIA_DASH_A, AIA_DASH_DOWN_A
+data 0A:958F AIA_DOWN_BACK_A, AIA_TAP_B_X4, AIA_A, AIA_DASH_B, AIA_WALK_IN_B, AIA_B, AIA_WALK_IN_B, AIA_DASH_A
+data 0A:983C AIA_DOWN_B, AIA_B, AIA_A, AIA_DOWN_BACK_A, AIA_DOWN_BACK_A, AIA_WALK_IN_B, AIA_DOWN_B, AIA_WALK_IN_B_BACK
+data 0A:9844 AIA_B, AIA_DOWN_B, AIA_JUMP_FWD, AIA_A, AIA_JUMP_JUMP_A, AIA_DOWN_BACK_A, AIA_DASH_DOWN_B, AIA_CASEY_RAIN
+data 0A:984C AIA_DASH_IN, AIA_JUMP_DOWN, AIA_DASH_JUMP_DOWN, AIA_DASH_B, AIA_DASH_DOWN_B, AIA_DASH_JUMP, AIA_GAP48_JUMP_2, AIA_GAP48_JUMP
+data 0A:9854 AIA_TAP_B_X4, AIA_WALK_IN_B, AIA_DOWN_BACK_A, AIA_WALK_IN_B_BACK
+data 0A:9858 AIA_DOWN_BACK_A, AIA_WALK_IN_B, AIA_DOWN_B, AIA_CASEY_KICK
+data 0A:99BA AIA_JUMP_FWD, AIA_GAP48_JUMP_2, AIA_JUMP_JUMP_A, AIA_HOTHEAD_FIRE_IN
+data 0A:99BE AIA_DASH_IN, AIA_JUMP_DOWN, AIA_DASH_JUMP_DOWN, AIA_DASH_B, AIA_DASH_DOWN_B, AIA_DASH_JUMP, AIA_DASH_A, AIA_DASH_DOWN_A
+data 0A:99C6 AIA_DOWN_B, AIA_DASH_A, AIA_JUMP_FWD, AIA_HOTHEAD_FIRE
+data 0A:9AEC AIA_A, AIA_WALK_IN_B, AIA_DOWN_BACK_A, AIA_WALK_IN_B
+data 0A:9BC2 AIA_JUMP_FWD, AIA_B_B_A_B, AIA_JUMP_JUMP_A, AIA_GAP48_WAVE
+data 0A:9BC6 AIA_DOWN_BACK_A, AIA_DOWN_B, AIA_DASH_DOWN_A, AIA_DASH_BACK_JUMP
+data 0A:9BCA AIA_DASH_IN, AIA_JUMP_DOWN, AIA_DASH_JUMP_DOWN, AIA_DASH_B, AIA_DASH_DOWN_B, AIA_DASH_JUMP, AIA_DASH_A, AIA_DASH_DOWN_A
+data 0A:9BD2 AIA_DASH_FAR_JUMP, AIA_SHREDDER_BOLTS, AIA_SHREDDER_BOLTS, AIA_WALK_IN_B
+data 0A:9CEE AIA_DOWN_B, AIA_DOWN_A_X2, AIA_WALK_IN_B_BACK, AIA_TAP_B_X4, AIA_LEO_SPIN, AIA_DASH_JUMP_DOWN, AIA_DOWN_A_LEO_SPIN, AIA_WATCH_RAPH_ROLL
+data 0A:9FF5 AIA_JUMP_FWD, AIA_JUMP_JUMP_A, AIA_B, AIA_A
+use 0A:9012 0A:9B74 0A:9C70 0A:9CBF 0A:9CE9 0A:9E08 0A:9E2C 0A:9F95 AIA_BACK_WATCH
+use 0A:8E14 0A:916D 0A:930A 0A:966B 0A:98E5 0A:9A7C 0A:9FAA AIA_GUARD_LOW
+use 0A:8F5E 0A:92FB AIA_WALK_RANGE2
+use 0A:8E11 0A:916A 0A:9307 0A:9668 0A:98E2 0A:9A79 0A:9C0C 0A:9F90 AIA_BACK_WATCH_B
+use 0A:900F 0A:9B7B 0A:9EDE AIA_DASH_BACK
+use 0A:8F27 0A:9216 0A:922E 0A:9377 0A:96D3 0A:9777 0A:99AA 0A:9B0C 0A:9E27 0A:9ED9 AIA_DASH_BACK_JUMP
+use 0A:8EAC 0A:92CE 0A:94C1 0A:962F 0A:98AF 0A:9A39 AIA_WALK_IN_B
+use 0A:8EC1 0A:9131 0A:92E6 0A:943E 0A:9757 0A:98D3 0A:9A85 AIA_GUARD_SHOT
+use 0A:9058 AIA_WALK_RANGE1
+use 0A:97A3 0A:9823 0A:98CD AIA_JUMP_DOWN
+use 0A:9B0F 0A:9F59 AIA_DASH_JUMP_DOWN
+use 0A:9055 0A:926B 0A:934D 0A:9369 0A:9493 0A:951B 0A:96D0 0A:9793 0A:980A 0A:994D 0A:99A4 0A:9B5E AIA_GET_BALL
+use 0A:8E7A 0A:8E9A 0A:965B 0A:98B5 0A:8F84 0A:9F5E AIA_B
+use 0A:9710 AIA_DOWN_B
+use 0A:9650 0A:9A4D AIA_JUMP_FWD
+use 0A:8E97 0A:9147 0A:936C 0A:9957 0A:9A7F AIA_DASH_B
+use 0A:8F0B 0A:901B 0A:905B 0A:91E9 0A:925A 0A:9329 0A:93AA 0A:94C9 0A:94E9 0A:9750 0A:991B 0A:9B1A 0A:9BBF 0A:9C93 0A:9D8E AIA_BALL_SPECIAL_B
+use 0A:8F61 0A:98C7 0A:9EBE 0A:9F41 AIA_A
+use 0A:9A53 AIA_JUMP_JUMP_A
+use 0A:8EFD 0A:8F34 0A:977A 0A:8F75 0A:9BF2 AIA_DOWN_BACK_A
+use 0A:900C AIA_DASH_A
+use 0A:9E31 AIA_DASH_FAR_JUMP
+use 0A:964A 0A:9727 0A:9E7A 0A:9EAB AIA_CASEY_KICK
+use 0A:92E0 AIA_DON_SPIN
+use 0A:90FA 0A:9188 0A:919A AIA_RAPH_ROLL
+use 0A:8DF8 0A:8E8F AIA_LEO_SPIN
+use 0A:94B5 0A:9578 AIA_MIKE_KICK_A
+use 0A:9572 AIA_MIKE_KICK_B
+use 0A:9874 0A:990A 0A:9910 0A:9F63 AIA_HOTHEAD_FIRE
+use 0A:9FE1 AIA_SHREDDER_BOLTS
+use 0A:9A63 0A:9BBC AIA_SHREDDER_WAVE
+use 0A:9197 0A:92D1 AIA_A_X4
+use 0A:91A8 AIA_B_B_A_B
+use 0A:9119 0A:912B AIA_WATCH_FWD_B
+use 0A:9D57 AIA_DOWN_A_X2
+use 0A:9438 0A:94B2 AIA_WATCH_MIKE_KICK_A
+use 0A:98BB 0A:9EFA 0A:9F27 AIA_CROUCH_B
+use 0A:979D AIA_GAP48_JUMP
+use 0A:94E6 AIA_BALL_SPECIAL_A
+use 0A:9018 AIA_WATCH_DASH_A
+use 0A:98C1 AIA_HOTHEAD_FIRE_IN
+use 0A:9AE2 AIA_GAP48_WAVE
+use 0A:8F11 0A:9CCB AIA_DASH_COMBO
+use 0A:9CA6 AIA_BACK_FWD_HOLD
+use 0A:9404 0A:9EA6 AIA_WALK_IN_B_BACK
+use 0A:95A4 0A:96D6 0A:97A0 0A:9833 0A:9E48 0A:9E9D AIA_CASEY_RAIN
+use 0A:9128 AIA_WATCH_BACK_FWD_B
+use 0A:9C6B AIA_SUB3
+use 0A:9425 0A:9435 0A:956C AIA_WATCH_DASH_B
+use 0A:8F81 0A:99B0 AIA_STAND
+use 0A:9100 AIA_WATCH_RAPH_ROLL
+use 0A:911F AIA_DASH_IN_B
+use 0A:9C66 AIA_IDLE
+use 0A:9839 0A:9E72 0A:9F84 AIA_TAP_B_X4
+use 0A:91B9 AIA_HEIGHT_RAPH_ROLL
+use 0A:995A AIA_SUB8
+use 0A:9A56 AIA_GAP68_WAVE
+use 0A:8E71 AIA_BACK_WATCH
+use 0A:8E74 AIA_GUARD_LOW
+data 0A:9224 AIA_DASH_A, AIA_DASH_JUMP_A, AIA_DASH_BACK, AIA_DASH_COMBO
+use 0A:9228 AIA_DASH_COMBO
+use 0A:922B AIA_DASH_BACK
+use 0A:9275 AIA_WALK_RANGE1
+; AI: target fighter states (aiTargetState = objState of the target)
+use 0A:84F0 0A:85D9 0A:8653 0A:8976 0A:89BC 0A:89D7 0A:8E2B 0A:8ED8 0A:8F9E 0A:9028 0A:9060 0A:90E8 0A:9151 0A:924C 0A:9320 0A:93F5 0A:946D 0A:95C5 0A:9688 0A:97BA 0A:989C 0A:98F8 0A:995F 0A:9A05 0A:9A94 0A:9C34 0A:9C77 0A:9CB5 0A:9CC7 0A:9D3F 0A:9E81 0A:9EB4 0A:9F48 0A:9F6A 0A:9FA0 FST_CHAR_MOVE
+use 0A:856E 0A:8E39 0A:8F19 0A:90E4 0A:9177 0A:93E0 0A:944A 0A:9546 0A:9604 0A:9634 0A:96E7 0A:97D4 0A:98A4 0A:98FC 0A:9FE8 FST_JUMP
+use 0A:8A3E 0A:9784 FST_SPECIAL
+use 0A:8DED 0A:944E 0A:9538 0A:9599 0A:9869 0A:98A0 0A:9AD2 FST_HURT
+use 0A:8E0D 0A:8EF2 0A:8FFB 0A:9124 0A:9155 0A:9166 0A:91EE 0A:9303 0A:931C 0A:9431 0A:9498 0A:95D3 0A:9715 0A:98DE 0A:9920 0A:9A27 0A:9A75 0A:9AC0 FST_CROUCH
+use 0A:8E4A 0A:8F39 0A:8FD0 0A:902C 0A:90EC 0A:918D 0A:91C6 0A:9246 0A:9452 0A:953C 0A:9600 0A:9696 0A:9900 FST_KNOCKDOWN
+use 0A:9EBA FST_HELD
+use 0A:9540 FST_STAND
+; AI decision/reaction routines: other operands
+use 0A:9137 0A:9383 0A:960B 0A:9887 0A:98F2 0A:9D71 0A:9EEF 0A:9F1F 0A:9A2E FST_JUMP
+use 0A:91D3 0B:A017 0B:A048 0B:A086 0B:A0BB 0B:A117 0B:A132 FST_CHAR_MOVE
+use 0A:91AE AIA_DASH_BACK_JUMP
+use 0A:9799 AIA_GAP48_JUMP
+use 0A:9FDD 0B:A021 0B:A0CE 0B:A15D AIA_SHREDDER_WAVE
+use 0B:A121 AIA_CASEY_RAIN
+use 0B:A038 AIA_DOWN_A_X2
+use 0B:A03D 0B:A0E2 AIA_GUARD_LOW
+use 0B:A060 0B:A0A8 AIA_A
+use 0B:A06A AIA_TAP_B_X4
+use 0B:A077 AIA_BALL_SPECIAL_B
+use 0B:A0AC AIA_B
+use 0B:A0B0 0B:A144 AIA_BACK_WATCH_B
+use 0B:A0E7 AIA_WALK_RANGE2
+use 0B:A0F7 0B:A188 AIA_SHREDDER_BOLTS
+use 0B:A0FC AIA_IDLE
+use 0B:A110 AIA_DASH_BACK_JUMP
+use 0B:A12B AIA_BACK_WATCH
+use 0B:A162 AIA_DASH_JUMP_DOWN
+use 0B:A17A AIA_JUMP_JUMP_A
+use 0A:8E9D 0A:9653 0A:9F79 0B:A065 0B:A183 BTN_B
+use 0A:9623 0A:96BC 0A:9705 0B:A05B BTN_A
+use 0A:8EA7 BTN_A|BTN_DOWN
+use 0A:95E1 0A:9E5E 0B:A0D6 BTN_DOWN
+use 0A:972A BTN_B|BTN_UP
+use 0A:9C58 0A:9E21 0B:A104 BTN_UP
+use 0A:9E67 BTN_B
+use 0A:982C CHAR_RAPH
+use 0A:9BDC CHAR_CASEY
+data 0A:9428 AIA_B, AIA_GUARD_LOW, AIA_A, AIA_BACK_WATCH_B
+data 0A:92A0 AIA_B, AIA_DASH_COMBO, AIA_DOWN_A_X2, AIA_DASH_COMBO
+
+; ---- sound streams (docs/sound.md; rom.txt `sound`)
+NOTE_C = $00 ; music note: pitch in the high nibble (octave from SC_OCTAVE), length in the low one (x base length, 0 = 16)
+NOTE_CS = $10
+NOTE_D = $20
+NOTE_DS = $30
+NOTE_E = $40
+NOTE_F = $50
+NOTE_FS = $60
+NOTE_G = $70
+NOTE_GS = $80
+NOTE_A = $90
+NOTE_AS = $A0
+NOTE_B = $B0
+DRUM_NOISE1 = $10 ; drum channel note: high nibble = drum (DrumSounds), low nibble = length. Plays SND_DRUM1
+DRUM_NOISE2 = $20 ; plays SND_DRUM2
+DRUM_NOISE3 = $30 ; plays SND_DRUM3
+DRUM_NOISE3B = $40 ; plays SND_DRUM3 as well
+DRUM_S47 = $60 ; plays DPCM sample SND_SAMPLE ($50 would too)
+DRUM_S48 = $70 ; sample SND_SAMPLE+1
+DRUM_S49 = $80 ; sample SND_SAMPLE+2
+DRUM_S4A = $90 ; sample SND_SAMPLE+3
+DRUM_S4B = $A0 ; sample SND_SAMPLE+4
+DRUM_S4C = $B0 ; sample SND_SAMPLE+5
+SC_REST = $C0 ; + length: silence
+SC_LEN = $D0 ; + base length; then channel setup: square 3 bytes (envelope, duty/volume, decay), triangle 1 (decay), drums 0
+SC_PACKED = $DE ; toggle packed notes: two pitches per byte (high, low nibble), each one base length
+SC_PACKED2 = $DF ; the same, each note two base lengths
+SC_OCTAVE = $E0 ; + octave 0-5
+SC_ENV = $E6 ; + env byte: bit 7 set = fade mode (low nibble = sndFadeSteps), else an EnvelopePtrs id (stored *2)
+SC_RELEASE = $E7 ; + release: the note is cut after n/16 of its length (0 = never)
+SC_LENGTH = $E8 ; + base length
+SC_DUTY = $E9 ; + n: low nibble 0 = duty bits (sndDuty, ORed into the volume register); else flags (bit 1: the high nibble of n replaces the duty/volume bits); 0 = clear the flags
+SC_FADE = $EA ; + n: fade-in at each note start: high nibble = starting volume, low nibble = frames per volume step (0 = no fade-in)
+SC_VIBRATO = $EB ; 0 = off, else a, b: sndVibId = (a-$50)*2 (pitch envelope), b = sndVibDepth: low nibble = depth (offset step * depth), high nibble = delay before the vibrato starts (x base length)
+SC_FLAGS = $EC ; + n: bits 7-6 = sndVolMin (lowest volume), bits 5-4 -> sndEchoFlags bits 3-2, bits 3-0 = echo mode (0 off; 1-3: n | $A0; 4-F: (n-3) | $B0); the echo replays the period of an earlier note from the channel's 4-note ring (EchoStore / EchoPeriodLoad)
+SC_DETUNE = $ED ; + pitch offset
+SC_TRANSPOSE = $EE ; + note offset
+SC_DIVIDER = $EF ; + n: every n-th frame the music channels skip their update (slower tempo), 0 = off (musicSkipPeriod)
+SC_VOLUME = $F0 ; + volume offset 0-8
+SC_SLIDE = $FA ; open a repeat block: passes, step[, volume ramp]; each pass plays the block again with the period lowered by another `step & $7F` (16-bit, accumulating); square / noise: every (b >> 4) passes the volume index grows by (b & 7), max $F (CmdSlide; read from code, not heard)
+SC_SLIDE_END = $FA ; the next $FA: jump back to the block start while passes are left, then close the block
+SC_LOOP = $FB ; loop start
+SC_LOOP2 = $FC ; loop start, second level
+SC_CALL = $FD ; + word: call a sub-stream (one level)
+SC_REPEAT = $FE ; + count: back to the loop start count times
+SC_GOTO = $FF ; SC_REPEAT, SC_GOTO + word: jump
+SC_END = $FF ; end of the stream / return from SC_CALL
+SFX_SQ1 = $80 ; SFX header: channels in the high nibble (streams in this order), base length in the low one
+SFX_SQ2 = $40
+SFX_TRI = $20
+SFX_NOISE = $10
+SFX_LEN = $00 ; + base length 1-15, then the channel setup (square: duty, sweep if duty & $0F = 0; triangle: 1 byte)
+SFX_REST = $00 ; silence (one byte)
+ENV_LOOP = $FB ; envelope: loop start ($FC/$FD work too)
+ENV_REPEAT = $FE ; + count: back to ENV_LOOP until it ran count times, then go on
+ENV_FOREVER = $FF ; ENV_REPEAT count: never go on
+ENV_HOLD = $FF ; keep the last value
+
+; ---- sound driver channels (X in bank 00)
+SNDCH_SQ1 = 0 ; music square 1
+SNDCH_SQ2 = 1 ; music square 2
+SNDCH_TRI = 2 ; music triangle
+SNDCH_DRUM = 3 ; music drums (noise channel, DrumSounds)
+SNDCH_SFX_SQ = 4 ; SFX on square 1 (SFX_SQ1)
+SNDCH_SFX_NOISE = 5 ; SFX on the noise channel (SFX_NOISE)
+SNDCH_COUNT = 6
+SND_PAUSE = $2D ; plays when a fight is paused / unpaused (the only sound while gamePaused)
+use 00:8096 D322 SND_PAUSE
+use 00:8A08 SNDCH_SQ1
+use 00:832B 00:834E 00:837A SNDCH_SQ2
+use 00:80B7 00:8100 00:8440 00:8463 00:86E8 00:871A 00:88D7 00:8924 00:89B7 00:89C2 00:8A4C 00:8A84 00:8C2B 00:8C46 00:8FA5 00:8FBD SNDCH_TRI
+use 00:80B3 00:8439 00:86EC 00:8716 00:8C20 00:8F90 SNDCH_DRUM
+use 00:889F 00:8FB1 SNDCH_SFX_SQ
+use 00:888F 00:88D1 00:8915 00:893C 00:8963 00:89B0 00:8F94 SNDCH_SFX_NOISE
+use 00:8057 00:9067 SNDCH_COUNT
+SND_DRUM1 = $01 ; noise drum SFX played by drum notes (DrumSounds)
+SND_DRUM2 = $02
+SND_DRUM3 = $03
+data 00:867C SND_DRUM1, SND_DRUM1, SND_DRUM2, SND_DRUM3, SND_DRUM3, SND_SAMPLE, SND_SAMPLE, SND_SAMPLE+1, SND_SAMPLE+2, SND_SAMPLE+3, SND_SAMPLE+4, SND_SAMPLE+5
+
+; hit kinds: objHitType ($04C0) of a fighter in FST_HURT selects the StateHurt handler. Set by the hit code in bank 03
+; (sub_03_ABF8). Seen in Mesen: STAND, AIR, BLOCK, KNOCKDOWN, BLOCK_SPECIAL, BALL; CROUCH, FIRE and RAIN only read in code, not seen in a run
+HIT_STAND = 0 ; normal hit on the ground
+HIT_AIR = 1 ; hit in the air / thrown up
+HIT_CROUCH = 2 ; hit in FST_CROUCH or FST_SHOT (HitTypeByState); seen in Mesen
+HIT_BLOCK = 3 ; blocked hit
+HIT_FIRE = 4 ; hit by ATK_HOTHEAD_FIRE (seen in Mesen: Hothead vs Casey run, tmp/w64)
+HIT_KNOCKDOWN = 5 ; knockdown
+HIT_BLOCK_SPECIAL = 6 ; blocked special attack
+HIT_BALL = 7 ; hit by the ball
+HIT_RAIN = 8 ; hit by ATK_CASEY_RAIN (seen in Mesen: Hothead vs Casey run, tmp/w63)
+use 03:AB3B HIT_BLOCK
+use 03:AB54 HIT_BLOCK_SPECIAL
+use 03:ABB3 HIT_BALL
+use 03:ABB8 HIT_FIRE
+use 03:ABCC HIT_KNOCKDOWN
+use 03:ABD0 HIT_RAIN
+use 03:ABD9 HIT_AIR
+use 02:8056 HIT_BALL
+use 02:87D6 HIT_AIR
+use 02:8F8A HIT_FIRE
+use 02:8F8E HIT_CROUCH
+data 03:AD38 HIT_STAND, HIT_AIR, HIT_CROUCH, 0, 0, 0, 0, HIT_CROUCH, 0, 0, 0, 0, 0
+
+; per-stage tables in bank F, indexed by storyStage (0-6): 0 sewer, 1 downtown, 2 sewer, 3 downtown, 4-5 ship, 6 waterfront
+STAGE_COUNT = 7
+data E935 MUS_SEWER, MUS_DOWNTOWN, MUS_SEWER, MUS_DOWNTOWN, MUS_SHIP, MUS_SHIP, MUS_WATERFRONT
+data E93C MUS_SEWER_HURRY, MUS_DOWNTOWN_HURRY, MUS_SEWER_HURRY, MUS_DOWNTOWN_HURRY, MUS_SHIP_HURRY, MUS_SHIP_HURRY, MUS_WATERFRONT_HURRY
+
+; AI range classes (aiRange: target, aiBallRange: ball, aiShotRange: shot), set by GetTargetRange / GetBallRange
+AIR_CLOSE = 0
+AIR_NEAR = 1
+AIR_MID = 2
+AIR_FAR = 3
+AIR_NO_BALL = 3 ; aiBallRange when there is no ball or it is far (GetBallRangeFar); verified in Mesen: 266/279/210/5676 hits of 0/1/2/3 in bank 0A
+use 02:8096 02:81B8 02:82CC 02:8312 02:831D 02:8438 02:8B3F 02:8DB5 02:8DDD 02:8E9F 02:8F73 02:9099 03:AA84 03:ABD7 03:B831 03:B8B4 03:BA2C 03:BDB5 0A:877F 0A:87C0 0A:87D1 0A:8AEA 0C:96E2 FLOOR_Y
+use 0A:81CB 0A:8590 0A:85BB 0A:85E5 0A:9264 0A:9340 0A:94CE 0A:94FB 0A:952D 0A:978F 0A:9BA5 0A:9C62 0A:9CBB 0A:9CD2 0A:9D53 0A:9DBB 0A:9F4E 0A:9FD6 0B:A07E 0B:A091 0B:A0C6 0B:A127 0B:A140 AIR_MID
+use 0A:8A36 0A:8A6F 0A:99D4 0A:9C3B 0A:9FA6 0A:9FBF 0B:A01D AIR_FAR
+use 0A:8A60 0A:9806 0A:998C 0A:9BE2 0A:9F2E 0B:A14A AIR_NEAR
+use 0A:9051 0A:932E 0A:9365 0A:975C 0A:985E 0A:9926 0A:9949 0A:9B54 AIR_NO_BALL
+
+; pad bit masks in the AI input code and fighter input
+use 0A:85F4 0A:874B 0A:87A8 0A:8887 BTN_B
+use 0A:8287 BTN_A|BTN_B|BTN_UP|BTN_DOWN|BTN_LEFT|BTN_RIGHT
+use 0A:832F 0A:8839 0A:883B 0A:8A54 BTN_LEFT|BTN_RIGHT
+use 0A:848C BTN_A|BTN_B|BTN_DOWN
+use 0A:8538 BTN_DOWN
+use 0A:85A7 0A:86C6 BTN_UP
+use 0A:85F6 0A:874D 0A:8872 0A:8889 0A:8ADF BTN_A|BTN_B|BTN_LEFT|BTN_RIGHT
+use 0A:87B0 0A:87B8 BTN_A|BTN_B|BTN_UP|BTN_LEFT|BTN_RIGHT
+use 0A:884C BTN_LEFT
+use 0A:8A69 BTN_UP|BTN_DOWN
+use 0A:8AF8 BTN_A
+use EF20 AIR_FAR
+use EF23 AIR_CLOSE
+use EF5B AIR_NEAR
+use EF5E AIR_MID
+
+MSS_BONUS_GAME = $10 @modeSubState ; sub-states from $10 on belong to the BONUS GAME (board-breaking) round: no health bar redraw, a hit scores 1, bonus digits. Mesen (Story, Leo vs Don, 12 000 frames): after match over $0A the game ran $17, $18, $19 while the BONUS GAME screen was shown (tmp/stg3 watch + screenshot at frame 9000)
+DASH_TAP = 1 @dashStage ; first tap seen
+DASH_RUN = 2 @dashStage ; running (the run animation is picked by it)
+OBJST_BUSY = $80 @objStatus ; fighter airborne, hurt/knocked down or held: cannot be grabbed (Mesen: set during FST 1 jump, 3 hurt, 5 special, 9/$0A hold, never otherwise)
+NES_BLACK = $0F @palette ; palette entry
+
+; sound ids by the place that plays them (Mesen: tmp/snd3 logs every PlaySound call with its caller)
+SND_BALL_IDLE = $0A ; BallIdle (02:9ED8)
+SND_RAPH_ROLL = $0B ; Raph's roll (03:B50C, RaphSpecialAnimWait)
+SND_LAND = $0C ; HurtRainLand (Casey rain hit landing; also HitReactionFlagged)
+SND_HIT_COMMON = $11 ; HitReactionCommon
+SND_HIT_ATTACK_OBJ = $12 ; AttackObjHitCheck (Mesen: via HitReactionFlagged)
+SND_BANNER = $14 ; IntroBannerDraw
+SND_SPAWN_SPECIAL = $16 ; SpawnSpecialAtkSnd
+SND_BOLT = $18 ; Shredder bolts (UpdateAttackObjs)
+SND_HOTHEAD_FIRE = $1B ; Hothead fire attack (AtkPhasesHotheadFireStep0; Mesen: forced Casey vs Hothead run)
+SND_SWOOSH = $1D ; Shredder wave start, ending fighter jump
+SND_STATE_0B = $1E ; State0BRun
+SND_SLOT7_APPEAR = $20 ; Slot7Appear (Mesen: 5 times)
+SND_NAME_LETTER = $26 ; NameEntryLetterCursor
+SND_ACCEPT = $28 ; Continue / name entry accepted, FightWinPoseSetup
+SND_KO_WAIT = $2A ; KoWaitOpponent (Mesen: 3 times)
+SND_HURRY = $2C ; UpdateHud (timer nearly out)
+SND_VOICE_SPECIAL = $54 ; sample: Leo / Raph / Mike special start
+SND_VOICE_CASEY = $56 ; sample: Casey jump kick / rain
+SND_VOICE_BOLTS = $57 ; sample: Shredder bolts
+SND_VOICE_WAVE = $58 ; sample: Shredder wave
+MUS_BONUS_CARD = $3D ; FightBonusCardWait (Mesen: PlaySound A=$3D from E81A, bonus game card, frame 6247)
+MUS_ENDING = $41 ; EndingSetup (Mesen: gameMode $0B poked, A=$41 from 0C:962E)
+MUS_CREDITS = $42 ; EndingCreditsSetup (Mesen: gameMode $0B, modeStep $0A poked, A=$42 from 0C:98C3)
+MUS_REMATCH = $43 ; RematchPrompt (Mesen: modeSubState $11 poked in Story, A=$43 from 0D:A487)
+MUS_CHALLENGER = $45 ; FightChallengerCardB (Mesen: modeSubState $1F poked in Story, A=$45 from E8A7)
+use 02:8808 SND_STATE_0B
+use 02:8A99 SND_KO_WAIT
+use 02:8F17 SND_LAND
+use 02:9ED8 SND_BALL_IDLE
+use 03:A3D9 0C:97EB SND_SWOOSH
+use 03:A55D SND_BOLT
+use 03:A5D1 SND_HOTHEAD_FIRE
+use 03:A90F SND_SLOT7_APPEAR
+use 03:ACAC SND_HIT_COMMON
+use 03:B39E 03:B4DD 03:B5C7 SND_VOICE_SPECIAL
+use 03:B3C6 SND_SPAWN_SPECIAL
+use 03:B50C SND_RAPH_ROLL
+use 03:B7F6 SND_VOICE_BOLTS
+use 03:B83E 03:B991 SND_VOICE_CASEY
+use 03:B92D SND_VOICE_WAVE
+use 03:BCFE SND_HIT_ATTACK_OBJ
+use 03:BE46 SND_BANNER
+use 0C:86C0 0C:8D91 E6DF SND_ACCEPT
+use 0C:8CBF MUS_SCORES
+use 0D:A07B MUS_SCORES
+use 0C:8DFA SND_NAME_LETTER
+use 0C:8FB9 SND_OPTION_CHANGE
+use 0C:962E MUS_ENDING
+use 0C:98C3 MUS_CREDITS
+use 0D:A487 MUS_REMATCH
+use E81A MUS_BONUS_CARD
+use E8A7 MUS_CHALLENGER
+use EAE3 SND_HURRY
+
+; objSpriteSet compares: fighter character / attack object ids
+use 02:8242 02:8575 CHAR_HOTHEAD
+use 02:8272 02:82E7 02:8CBA 02:8D93 02:8E44 02:9095 02:91CA 02:9334 03:AB03 DECC CHAR_CASEY
+use 02:830B 02:8DEA 02:92FE CHAR_SHREDDER
+use 02:89C5 02:8B67 02:8FD2 02:902F 02:90DF 02:9278 CHAR_RAPH
+use 02:8EEE 03:B9CD ATK_CASEY_RAIN
+use 02:9D39 0A:89B1 CHAR_DON
+use 02:9D4D CHAR_MIKE
+use 03:A83E 03:AC6B 03:BCE4 ATK_SHREDDER_BOLT
+use 03:AAF1 03:AC13 03:AC79 03:ACF1 ATK_HOTHEAD_FIRE
+use 03:AD11 03:BD3A ATK_DON
+use EC61 ATK_SHREDDER_WAVE
+
+; PPUCTRL bits (ppuCtrlShadow): bits 0-1 = base nametable
+PPUCTRL_NT_X = $01
+PPUCTRL_NT_Y = $02
+PPUCTRL_NMI = $80
+use 0C:9915 DD70 F008 F55B F582 $FF^(PPUCTRL_NT_X|PPUCTRL_NT_Y)
+use 0C:9218 $FF^PPUCTRL_NT_Y
+use EA13 $FF^PPUCTRL_NT_X
+use FE59 $FF^PPUCTRL_INC32
+use F2D8 $FF^PPUCTRL_NMI
+use EA0D FA02 PPUCTRL_NT_X
+use 0C:924A 0C:9282 0C:92EE 0C:92C9 0C:98F4 F534 PPUCTRL_NT_Y
+
+; ball object (slot 6) phases = BallPhaseRun jump table
+BALL_SPAWN = 0
+BALL_IDLE = 1
+BALL_WAIT = 2
+BALL_HELD = 3
+BALL_THROWN = 4
+BALL_BOUNCE = 5
+BALL_GONE = 6
+use 02:86D7 BALL_THROWN
+use 02:9E57 02:9F66 03:A8E7 03:A920 E477 BALL_GONE
+use 02:9E71 02:9EF8 EE17 BALL_WAIT
+use 02:9FE6 DDAB BALL_IDLE
+use 03:A1E2 BALL_BOUNCE
+use 03:A965 BALL_SPAWN
+
+; sound channel flags (sndChanFlags, bank 00 only: the byte is a scratch variable in other banks)
+SNDF_SFX = $01
+SNDF_REST = $02
+SNDF_LOOP1 = $04
+SNDF_LOOP2 = $08
+SNDF_CALL = $10
+SNDF_SLIDE = $40
+SNDF_FADE_IN = $80
+use 00:80AF SNDF_SFX|SNDF_REST
+use 00:8162 00:816C $FF^SNDF_FADE_IN
+use 00:839C 00:8974 00:8A3C 00:8A63 SNDF_SLIDE
+use 00:842B 00:890F $FF^SNDF_REST
+use 00:8568 SNDF_FADE_IN
+use 00:86E2 00:8C27 SNDF_REST
+use 00:8AC7 $FF^SNDF_SLIDE
+use 00:8AD9 00:8B2D SNDF_LOOP1
+use 00:8AFD SNDF_LOOP2
+use 00:8B18 00:8B71 SNDF_CALL
+use 00:8B3D $FF^SNDF_LOOP1
+use 00:8B5D $FF^SNDF_LOOP2
+use 00:8B81 $FF^SNDF_CALL
+
+; MMC3 bank select register numbers (R0-R5 CHR, R6/R7 PRG)
+MMC3_R0 = 0
+MMC3_R1 = 1
+MMC3_R2 = 2
+MMC3_R3 = 3
+MMC3_R4 = 4
+MMC3_R5 = 5
+MMC3_R6 = 6
+MMC3_R7 = 7
+use F353 FC34 MMC3_R0
+use FC3E MMC3_R1
+use F9A4 FC49 MMC3_R2
+use F9AF FC53 MMC3_R3
+use FC5D MMC3_R4
+use FC67 MMC3_R5
+use F600 F676 FBF2 MMC3_R6
+use FBFE MMC3_R7
+use F638 F8DB F920 F98F F9DA FA25 MMC3_R0
+
+; APU / PPU register values
+SNDCHN_SQ1 = $01
+SNDCHN_SQ2 = $02
+SNDCHN_TRI = $04
+SNDCHN_NOISE = $08
+SNDCHN_DMC = $10
+SQ_VOL_SILENT = $30 ; SQ1_VOL: halt + constant volume 0
+SQ_SWEEP_OFF = $7F ; SQ1_SWEEP: sweep disabled (negate + shift 7, so the period is never muted)
+APU_FRAME_NO_IRQ = $C0 ; JOY2 ($4017): 5-step sequence, frame IRQ inhibited
+PPUCTRL_SPR_1000 = $08 ; sprite tiles from pattern table $1000
+OAM_PAGE = $02 ; OAM DMA source page: the OAM buffer at $0200 (oamBuffer)
+use 00:86AA 00:8BE3 F2BB SNDCHN_SQ1|SNDCHN_SQ2|SNDCHN_TRI|SNDCHN_NOISE
+use 00:86CD SNDCHN_SQ1|SNDCHN_SQ2|SNDCHN_TRI|SNDCHN_NOISE|SNDCHN_DMC
+use 00:8BDE SNDCHN_SQ1|SNDCHN_SQ2|SNDCHN_NOISE
+use 00:8BF0 00:9071 SQ_VOL_SILENT
+use 00:8BF5 00:907C SQ_SWEEP_OFF
+use F2C0 APU_FRAME_NO_IRQ
+use F34E PPUCTRL_SPR_1000
+use F22E OAM_PAGE
+
+; PPUMASK bits (ppuMaskShadow)
+PPUMASK_LEFT_BG = $02
+PPUMASK_LEFT_SPR = $04
+PPUMASK_BG = $08
+PPUMASK_SPR = $10
+use F2CD PPUMASK_LEFT_BG|PPUMASK_LEFT_SPR|PPUMASK_BG|PPUMASK_SPR
+use F240 F283 F2E7 F484 $FF^(PPUMASK_BG|PPUMASK_SPR)
+use F48E PPUMASK_BG|PPUMASK_SPR
+use D21E DD0F DD17 $FF^OAM_FLIP_H
+
+; SetFighterPose ids (CharPoses rows): 0 POSE_CROUCH (SetCrouchPose), 1 POSE_IDLE (ReturnToStand, PhaseIntro)
+POSE_CROUCH = 0 ; knees-bent pose (turtle frame $99): Mesen (12 000 frames, Leo, objFrame + objState watch) showed $99 in FST_CROUCH 26x and FST_JUMP 25x (idle frame $80 in FST_STAND); used by StateCrouch / StateJump / StateShot and the air-hurt landing
+POSE_IDLE = 1 ; idle fighting stance (turtle frame $80, gfx/frames_turtles.png): ReturnToStand, PhaseIntro (Mesen screenshot: the fighters stand), the crouch-attack start and the hold end
+use 02:8156 02:835B 02:8478 02:9184 POSE_IDLE
+use 02:8630 02:8CCB POSE_CROUCH
+POSE_BLOCK = $07 ; guard pose (+1 when crouching): OpponentCloseSide sets it when the D-pad is held away from a close attacker, the same test as the HIT_BLOCK hit check in CheckHits
+use 02:8945 POSE_BLOCK
+OBJST_SPECIAL = $20 ; fighter inside a special move: set when Leo's spin starts (03:B399), cleared ~92 frames later (Mesen, forced Leo spin command); cleared with OBJST_BUSY by ClearObjStatusFlags; StartAttack does not grab a target with either bit set
+use 02:82D3 OBJST_BUSY|OBJST_SPECIAL
+use 02:8FB4 $FF^(OBJST_BUSY|OBJST_SPECIAL)
+
+use DC84 DCED FLOOR_Y
+use DC7D FLOOR_Y-1
+
+use 02:92E8 CHAR_HOTHEAD
+use 02:92EC CHAR_CASEY
+use 03:B399 OBJST_SPECIAL
+OBJST_NO_PUSH = $40 ; attack object that does not push the victim: CheckHits (03:AA7B) skips the pushTimer (5 / 8 frames, depending on the screen edge) of a grounded victim when it is set. Set on the Hothead fire (spawn $C0 with OBJST_BUSY, $40 alone once frame $AB shows) and on slot 7 (Mesen: slots 5/6/7 = $40 / $80 / $C0); ClearObjStatusFlags keeps it. Mesen test (same bot seed, 9 000 frames): with $40 held in objStatus of the punch objects (slots 2/3) pushTimer was set to 5/8 once instead of 9 times (tmp/n0 vs tmp/n1)
+use 03:A5CC 03:A907 OBJST_BUSY|OBJST_NO_PUSH
+use 03:A609 OBJST_NO_PUSH
+use 03:AA9F 03:BE8D 02:8F53 OBJST_BUSY
+
+; remaining fight sub-states: the index of the handler in FightSubState (named after the handler)
+FS_FAR_DA36C = $02 @modeSubState
+FS_STAGE_INTRO_SCROLL = $04 @modeSubState
+FS_ROUND_INTRO = $06 @modeSubState
+FS_WIN_POSE_SETUP = $0B @modeSubState
+FS_WIN_POSE_RUN = $0C @modeSubState
+FS_CONTINUE_SCREEN = $0E @modeSubState
+FS_END_CARDS_START = $0F @modeSubState
+FS_END_CARDS_WAIT = $10
+FS_FAR_DA427 = $11 @modeSubState
+FS_FAR_DA48F = $12 @modeSubState
+FS_SWITCH_TO_VS_PLAYER = $14 @modeSubState
+FS_GO_ENDING = $15 @modeSubState
+FS_BONUS_GAME_CARD = $16 @modeSubState
+FS_BONUS_GAME_CARD2 = $17 @modeSubState
+FS_BONUS_CARD_WAIT = $18 @modeSubState
+FS_CHALLENGE_CHECK = $19 @modeSubState
+FS_LOST_SETUP = $1A @modeSubState
+FS_LOST_ANIM = $1B @modeSubState
+FS_LOST_WAIT = $1C @modeSubState
+FS_CHALLENGER_CARD_A = $1D @modeSubState
+FS_SHREDDER_TAUNT = $1E @modeSubState
+FS_SHREDDER_WINS = $20 @modeSubState
+FS_PICK_OPPONENT = $01 ; FightPickOpponent (modeSubState 1: load the next fight)
+use 0F:E66C 0F:E89D FS_PICK_OPPONENT
+use 0E:D1B1 0F:E153 FS_ROUND
+use 02:8AB1 FS_ROUND_OVER
+CHR_HUD_R0 = $7C ; 1 KB CHR banks $7C-$7F hold the HUD font, digits and the TURTLES logo (gfx/chr_0F.png); the HUD split loads $7C into R0 (Mesen: the most common R0/R1 pair, 9 938 writes each in 9 000 frames) ...
+CHR_HUD_R1 = $7E ; ... and $7E into R1
+use F922 E808 F586 FA4F FAB2 FAF1 FB35 CHR_HUD_R0
+use F92B F9DF FB24 F58A CHR_HUD_R1
+
+; Arena background CHR banks (R0; the stage split also loads R1 = R0 + 2). Verified in Mesen by holding storyStage
+; = 1..6 (tmp/stg): stage 2 R0/R1 = $68/$6A (sewer), 1 and 3 = $64/$66 (downtown), 4 and 5 = $60/$62 (pirate ship),
+; 6 = $5C/$5E (waterfront); StageScreens and StageChrBanks agree.
+CHR_BG_SEWER = $68
+CHR_BG_DOWNTOWN = $64
+CHR_BG_SHIP = $60
+CHR_BG_WATERFRONT = $5C
+data 0F:E912 CHR_BG_SEWER, CHR_BG_SEWER+2, CHR_BG_DOWNTOWN, CHR_BG_DOWNTOWN+2, CHR_BG_SEWER, CHR_BG_SEWER+2, CHR_BG_DOWNTOWN, CHR_BG_DOWNTOWN+2, CHR_BG_SHIP, CHR_BG_SHIP+2, CHR_BG_SHIP, CHR_BG_SHIP+2, CHR_BG_WATERFRONT, CHR_BG_WATERFRONT+2
+
+; 1 KB CHR banks $78-$7B (top half of gfx/chr_0F.png) hold the KONAMI and TMNT logo tiles. The title screen maps $78/$7A
+; into R0/R1 (Mesen: R0 $78 / R1 $7A during the title and demo), the Konami screen maps $78 into both. Verified with
+; chrSwap: replacing R0 $78 by $64 changes the Konami screen (frame 500) and the title (frame 5000).
+CHR_LOGO_R0 = $78
+CHR_LOGO_R1 = $7A
+use F021 F52C CHR_LOGO_R0
+use F025 CHR_LOGO_R1
+
+; R0 $72 = font of the character name banners of the intro parade (LEONARDO, RAPH ...): chrSwap={0,0x72,0x7C,0} changes exactly
+; that text row (y 158-174) in Mesen (gameMode $0A / modeStep 10 poked at frame 5200). IrqStageHandler13 is the last split of
+; a stage: it sets R0/R1 = $72/$70 (1 424 writes in 9 000 frames of the story bot) for the rest of the frame. Swapping R0 $72 for
+; $7C there leaves the fight frame pixel-identical (the same swap on the arena bank $64 garbles it), and so does swapping R1 $70
+; (chrSwap={1,0x70,0x7C,0}, 1 423 writes, shots every 1000 frames up to 8000), also in the parade. So the pair only matters for the
+; banner text; the R1 half is never drawn in any tested frame and its purpose is not known.
+CHR_NAME_BANNER_R0 = $72
+CHR_SPLIT_END_R1 = $70
+use FB77 CHR_NAME_BANNER_R0
+use FB7D CHR_SPLIT_END_R1
+
+; Sprite bank R3 $21 holds the title menu cursor (the shuriken left of STORY / VS PLAYER ...): swapping it for $64 with chrSwap
+; (Mesen, frame 5000) changes only the cursor glyph, the rest of the title is identical.
+CHR_TITLE_CURSOR_R3 = $21
+use F01D CHR_TITLE_CURSOR_R3
+use 03:ADE3 03:AEF7 03:AF1E E42C E7F6 FLOOR_Y ; objY compared with / set to the floor line
+use 02:9CF0 02:9EC5 FLOOR_Y-4 ; Shredder special: objY test 4 px above the floor line
+use E847 FLOOR_Y-1
+
+; objAttr ($0500+slot) as read by DrawMetasprite (0E:D822): bit 7 set = override the palette / priority of every entry of the
+; metasprite with objAttr & $23 (entry attribute & $FC | objAttr & $23); bit 7 clear = entries are used unchanged.
+OBJATTR_OVERRIDE = $80 @objAttr
+OBJATTR_MASK = $23 ; palette bits 0-1 and OAM_BEHIND
+use D826 OBJATTR_MASK
+use 02:8062 03:A4F2 03:A957 06:816B 0D:A1F2 0D:A3B3 DCFE DFC6 E43D OBJATTR_OVERRIDE
+
+; BONUS GAME sprite/background bank in R5: replacing R5 $20 by $64 (chrSwap) changes the BONUS GAME screen (frame 9250,
+; x 92-194, y 74-153) and nothing else in the fight/title frames. The bonus screen init loads it into chrBanks+5.
+CHR_BONUS_R5 = $20
+use E80C CHR_BONUS_R5
+
+; PLAYER SELECT screen banks: CharSelectLoadBanks (06:80E4) sets chrBanks R0 = $74 and R1 = $58 (Mesen: R0 $74 is written by the NMI
+; copy F640 / SetChrBanks FC3E, R1 $58 as often). chrSwap R0 $74 -> $64 changes only the band x 24-232, y 80-120 (portrait / name
+; row) from frame 5800 on (tmp/v0 vs tmp/v1); R1 $58 has not been swapped. The $74 in IrqStageHandler6 (FA45, FA63) was never seen
+; written by the IRQ in that screen (the trace shows F640/FC3E only), so those two stay numbers.
+CHR_SELECT_R0 = $74
+CHR_SELECT_R1 = $58
+use 06:80EA CHR_SELECT_R0
+use 06:80EE CHR_SELECT_R1
+; chrTrace check (R3 $21 in the title/demo run): every write comes from the NMI copy F654, i.e. from chrBanks+3 = F01D; the IRQ
+; handler 12 load of $21 (FB5E) was not seen, so it stays a number. chrTrace R0 $72 in the story fight: all writes come from FB7C,
+; the IRQ handler 13 itself, so CHR_NAME_BANNER_R0 is a real IRQ-written bank (but invisible, see above).
+
+SHAKE_FRAMES = $20 @shakeTimer
+
+; R0 bank of IrqStageHandler10 = split id $0C (tbl_F83C entry 12), set only by RankingInit 0C:9FD6: R0 = $5A, R1 = CHR_HUD_R1.
+; Verified in Mesen (gameMode $0C poked at frame 5200 = the ranking screen): R0 $5A is written 1 797 times, and chrSwap={0,0x5A,0x7C,0}
+; changes the whole screen: this bank holds the ranking screen graphics.
+CHR_RANKING_R0 = $5A
+use FB1E CHR_RANKING_R0
+
+; objTimer start values of single-site fighter / ball states (frames; the name is the routine that loads it, the build checks each byte)
+PHASE_READY_TIME = $A0
+use 02:80D0 PHASE_READY_TIME
+KNOCKDOWN_TIMER = $10
+use 02:83ED KNOCKDOWN_TIMER
+WIN_POSE_START_TIME = $90
+use 02:88B8 WIN_POSE_START_TIME
+WIN_POSE_WAIT_TIME = $80
+use 02:88FA WIN_POSE_WAIT_TIME
+KO_VOICE_DELAY = $40
+use 02:8A60 KO_VOICE_DELAY
+HURT_FIRE_TIME = $3C
+use 02:8D16 HURT_FIRE_TIME
+HURT_BALL_TIMER_TIME = $1C
+use 02:8DA7 HURT_BALL_TIMER_TIME
+HURT_BALL_TIME_A = $2C
+use 02:8E79 HURT_BALL_TIME_A
+HURT_BALL_TIME_B = $10
+use 02:8EA9 HURT_BALL_TIME_B
+HURT_RAIN_LAND_TIME = $30
+use 02:8EF7 HURT_RAIN_LAND_TIME
+BALL_IDLE_TIME = $60
+use 02:9EFD BALL_IDLE_TIME
+BALL_RESPAWN_TIME = $E0
+use 02:9F56 BALL_RESPAWN_TIME
+
+; objTimer start values loaded by the routine in the name (frames; the build checks every byte). Unverified in play, so no more than "what this routine waits".
+LAUNCH_BALL_DIRECTION_TIME_A = $06
+use 03:A0CF LAUNCH_BALL_DIRECTION_TIME_A
+LAUNCH_BALL_DIRECTION_TIME_B = $14
+use 03:A0F0 LAUNCH_BALL_DIRECTION_TIME_B
+START_SPECIAL_ATK_TIME = $80
+use 03:A47F START_SPECIAL_ATK_TIME
+ATK_PHASES_CASEY_STEP0_TIME = $10
+use 03:A589 ATK_PHASES_CASEY_STEP0_TIME
+ATK_PHASES_HOTHEAD_FIRE_STEP0_TIME = $08
+use 03:A5C7 ATK_PHASES_HOTHEAD_FIRE_STEP0_TIME
+ATK_PHASES_DON2_STEP0_TIME = $10
+use 03:A62A ATK_PHASES_DON2_STEP0_TIME
+TURTLE_POWER_SLOT_TIME = $08
+use 03:A85C TURTLE_POWER_SLOT_TIME
+SLOT7_MOVE_TIME = $30
+use 03:A933 SLOT7_MOVE_TIME
+SLOT7_FALL_TIME = $60
+use 03:A95D SLOT7_FALL_TIME
+INTRO_FIGHTER_WAIT_TIME = $03
+use 03:BDD8 INTRO_FIGHTER_WAIT_TIME
+SPLINTER_STOP_TIME = $20
+use 03:BF76 SPLINTER_STOP_TIME
+CONTINUE_INIT_TIME_A = $09
+use 0C:8603 CONTINUE_INIT_TIME_A
+CONTINUE_INIT_TIME_B = $46
+use 0C:8608 CONTINUE_INIT_TIME_B
+CONTINUE_SCREEN_TIMERS_TIME = $03
+use 0C:866F CONTINUE_SCREEN_TIMERS_TIME
+CONTINUE_INPUT_TIME = $60
+use 0C:86AD CONTINUE_INPUT_TIME
+CONTINUE_QUEUE_TEXT_TIME = $60
+use 0C:86FC CONTINUE_QUEUE_TEXT_TIME
+INTRO_MANHATTAN_TEXT_TIME = $A0
+use 0C:9106 INTRO_MANHATTAN_TEXT_TIME
+INTRO_LETTER_TEXT_TIME = $20
+use 0C:9151 INTRO_LETTER_TEXT_TIME
+INTRO_SHREDDER_LETTER_BOX_TIME = $03
+use 0C:9187 INTRO_SHREDDER_LETTER_BOX_TIME
+INTRO_SHREDDER_LETTER_TEXT_TIME = $60
+use 0C:91A6 INTRO_SHREDDER_LETTER_TEXT_TIME
+INTRO_FADE_MUSIC_WAIT_TIME = $40
+use 0C:91BF INTRO_FADE_MUSIC_WAIT_TIME
+INTRO_PARADE_BLOCKS_INIT_TIME = $09
+use 0C:9329 INTRO_PARADE_BLOCKS_INIT_TIME
+INTRO_PARADE_BLOCKS_DRAW_TIME = $09
+use 0C:935E INTRO_PARADE_BLOCKS_DRAW_TIME
+INTRO_SCROLL_WAIT_TIME = $4B
+use 0C:938D INTRO_SCROLL_WAIT_TIME
+ENDING_TEXT_TIME = $C0
+use 0C:96B4 ENDING_TEXT_TIME
+ENDING_WATERFRONT_SETUP_TIME = $30
+use 0C:96FE ENDING_WATERFRONT_SETUP_TIME
+ENDING_FIGHTER_RUN_ACCEL_TIME = $60
+use 0C:9785 ENDING_FIGHTER_RUN_ACCEL_TIME
+ENDING_FIGHTER_FALL_TIME = $20
+use 0C:981B ENDING_FIGHTER_FALL_TIME
+ENDING_FIGHTER_LAND_WAIT_TIME = $60
+use 0C:982A ENDING_FIGHTER_LAND_WAIT_TIME
+ENDING_PORTRAIT_SETUP_TIME = $90
+use 0C:986A ENDING_PORTRAIT_SETUP_TIME
+SET_CREDITS_WAIT_TIMER_TIME = $60
+use 0C:98C8 SET_CREDITS_WAIT_TIMER_TIME
+ENDING_HARD_MODE_TEXT_TIME = $40
+use 0C:9941 ENDING_HARD_MODE_TEXT_TIME
+CONTINUE_MENU_CURSOR_TIME = $50
+use 0D:A4C7 CONTINUE_MENU_CURSOR_TIME
+FIGHT_PICK_OPPONENT_TIME = $40
+use E221 FIGHT_PICK_OPPONENT_TIME
+FIGHT_VS_SCREEN_TIME = $D0
+use E2DA FIGHT_VS_SCREEN_TIME
+FIGHT_WIN_POSE_SETUP_TIME = $30
+use E6EB FIGHT_WIN_POSE_SETUP_TIME
+FIGHT_END_CARDS_START_TIME = $FF
+use E758 FIGHT_END_CARDS_START_TIME
+FIGHT_STORY_ADVANCE_STAGE_TIME = $60
+use E777 FIGHT_STORY_ADVANCE_STAGE_TIME
+FIGHT_BONUS_GAME_CARD_TIME = $20
+use E7AE FIGHT_BONUS_GAME_CARD_TIME
+FIGHT_LOST_CLEAR_OBJS_TIME = $40
+use E87B FIGHT_LOST_CLEAR_OBJS_TIME
+
+; objY start values loaded by the routine in the name (the build checks every byte). Unverified in play: only "where this routine puts the object".
+BALL_PHASE_RUN_Y = $AC
+use 02:9E69 BALL_PHASE_RUN_Y
+BALL_SPAWN_Y = $50
+use 02:9E9B BALL_SPAWN_Y
+BALL_IDLE_Y = $AC
+use 02:9EDD BALL_IDLE_Y
+LAUNCH_BALL_Y = $90
+use 03:A02D LAUNCH_BALL_Y
+LAUNCH_BALL_DIRECTION_Y_A = $88
+use 03:A06D LAUNCH_BALL_DIRECTION_Y_A
+LAUNCH_BALL_DIRECTION_Y_B = $84
+use 03:A0C5 LAUNCH_BALL_DIRECTION_Y_B
+LAUNCH_BALL_DIRECTION_Y_C = $90
+use 03:A11E LAUNCH_BALL_DIRECTION_Y_C
+ATK_PHASES_HOTHEAD_FIRE_STEP0_Y = $A8
+use 03:A5B3 ATK_PHASES_HOTHEAD_FIRE_STEP0_Y
+ATK_PHASES_CASEY_RAIN_STEP0_Y = $90
+use 03:A652 ATK_PHASES_CASEY_RAIN_STEP0_Y
+SLOT7_APPEAR_Y = $38
+use 03:A914 SLOT7_APPEAR_Y
+RAPH_SPECIAL_ANIM_WAIT_Y = $98
+use 03:B507 RAPH_SPECIAL_ANIM_WAIT_Y
+RAPH_SPECIAL_HIT_Y = $AC
+use 03:B55F RAPH_SPECIAL_HIT_Y
+WIN_VOICE_BY_STAGE_Y = $40
+use 03:BB92 WIN_VOICE_BY_STAGE_Y
+INTRO_BANNER_DRAW_Y = $80
+use 03:BE5A INTRO_BANNER_DRAW_Y
+SHOW_TIMER_SETTING_Y = $60
+use 0C:80A1 SHOW_TIMER_SETTING_Y
+RESET_CURSOR_OBJ_Y = $1F
+use 0C:8644 RESET_CURSOR_OBJ_Y
+VS_SETUP_PALETTES_Y = $2F
+use 0C:88EB VS_SETUP_PALETTES_Y
+DRAW_VS_LEVEL_SPRITES_Y = $57
+use 0C:89DA DRAW_VS_LEVEL_SPRITES_Y
+NAME_ENTRY_LETTER_CURSOR_Y = $68
+use 0C:8DB5 NAME_ENTRY_LETTER_CURSOR_Y
+NAME_ENTRY_PLACE_SIDE_CURSOR_Y = $58
+use 0C:8F27 NAME_ENTRY_PLACE_SIDE_CURSOR_Y
+INTRO_SCREEN_LOAD_Y = $1F
+use 0C:913B INTRO_SCREEN_LOAD_Y
+ENDING_SCREEN_INIT_Y = $1F
+use 0C:9669 ENDING_SCREEN_INIT_Y
+ENDING_FIGHTER_RUN_WAIT_Y = $38
+use 0C:97A4 ENDING_FIGHTER_RUN_WAIT_Y
+FIGHT_STAGE_INTRO_SCROLL_Y_A = $0F
+use E373 FIGHT_STAGE_INTRO_SCROLL_Y_A
+FIGHT_STAGE_INTRO_SCROLL_Y_B = $8F
+use E378 FIGHT_STAGE_INTRO_SCROLL_Y_B
+SHOW_CHALLENGE_CARD_RUN_Y = $2F
+use E8D6 SHOW_CHALLENGE_CARD_RUN_Y
+
+; start values of timers / velocities / positions loaded by the routine in the name (the build checks every byte; unverified in play)
+RELEASE_BALL_VEL_X = $02
+use 02:84E8 RELEASE_BALL_VEL_X
+KO_VOICE_ANIM_TIME = $10
+use 02:8A46 KO_VOICE_ANIM_TIME
+HURT_STAND_POWER_HURT_TIMER = $0B
+use 02:8C49 HURT_STAND_POWER_HURT_TIMER
+HURT_STAND_SET_DELAY_HIT_DELAY = $14
+use 02:8C4E HURT_STAND_SET_DELAY_HIT_DELAY
+HURT_BLOCK_START_HURT_TIMER = $0C
+use 02:8CE5 HURT_BLOCK_START_HURT_TIMER
+HURT_BALL_RUN_VEL_X_FRAC = $02
+use 02:8D47 HURT_BALL_RUN_VEL_X_FRAC
+HURT_BALL_TIMER_HURT_TIMER = $08
+use 02:8D9C HURT_BALL_TIMER_HURT_TIMER
+HURT_BALL_ANIM_TICK_ANIM_TIME = $06
+use 02:8E0D HURT_BALL_ANIM_TICK_ANIM_TIME
+HURT_BALL_ANIM_TIME = $08
+use 02:8EC1 HURT_BALL_ANIM_TIME
+RESET_FIGHTER_FOR_HURT_HURT_TIMER = $10
+use 02:8F5B RESET_FIGHTER_FOR_HURT_HURT_TIMER
+STEP_HOLD_ANIM_HURT_TIMER = $14
+use 02:90E8 STEP_HOLD_ANIM_HURT_TIMER
+HELD_ANIM_STEP_HIT_DELAY = $04
+use 02:9354 HELD_ANIM_STEP_HIT_DELAY
+LEO_INPUT_SPECIAL_TIME = $14
+use 02:9A2F LEO_INPUT_SPECIAL_TIME
+CASEY_DOWN_CHECK_SPECIAL_TIME = $10
+use 02:9BA8 CASEY_DOWN_CHECK_SPECIAL_TIME
+SHREDDER_SPECIAL_CHECK_SPECIAL2_TIME = $10
+use 02:9C8C SHREDDER_SPECIAL_CHECK_SPECIAL2_TIME
+SHREDDER_SPECIAL2_CHECK_SPECIAL2_TIME = $14
+use 02:9CD2 SHREDDER_SPECIAL2_CHECK_SPECIAL2_TIME
+SHREDDER_SECOND_COMMAND_SPECIAL2_TIME = $14
+use 02:9D0B SHREDDER_SECOND_COMMAND_SPECIAL2_TIME
+BALL_SPAWN_VEL_Y = $02
+use 02:9EA0 BALL_SPAWN_VEL_Y
+BALL_BOUNCE_VEL_Y = $FD
+use 02:9FC9 BALL_BOUNCE_VEL_Y
+LAUNCH_BALL_DIRECTION_VEL_Y_FRAC = $C0
+use 03:A077 LAUNCH_BALL_DIRECTION_VEL_Y_FRAC
+LAUNCH_BALL_DIRECTION_VEL_X_A = $02
+use 03:A0F5 LAUNCH_BALL_DIRECTION_VEL_X_A
+LAUNCH_BALL_DIRECTION_VEL_X_B = $02
+use 03:A10B LAUNCH_BALL_DIRECTION_VEL_X_B
+LAUNCH_BALL_DIRECTION_2_VEL_Y = $08
+use 03:A148 LAUNCH_BALL_DIRECTION_2_VEL_Y
+ATK_PHASES27_STEP1_VEL_X = $20
+use 03:A383 ATK_PHASES27_STEP1_VEL_X
+ATK_PHASES15_STEP1_VEL_X = $14
+use 03:A3C3 ATK_PHASES15_STEP1_VEL_X
+ATK_PHASES_LEO_STEP0_HURT_TIMER = $0C
+use 03:A46A ATK_PHASES_LEO_STEP0_HURT_TIMER
+ATK_PHASES_SHREDDER_BOLT_STEP1_VEL_X = $22
+use 03:A568 ATK_PHASES_SHREDDER_BOLT_STEP1_VEL_X
+HIT_REACTION_COMMON_HIT_DELAY_A = $20
+use 03:AC54 HIT_REACTION_COMMON_HIT_DELAY_A
+HIT_REACTION_COMMON_HIT_DELAY_B = $10
+use 03:AC9B HIT_REACTION_COMMON_HIT_DELAY_B
+LEO_SPECIAL_SPIN_VEL_X = $03
+use 03:B38C LEO_SPECIAL_SPIN_VEL_X
+LEO_SPECIAL_SPIN_ANIM_VEL_X_FRAC = $10
+use 03:B441 LEO_SPECIAL_SPIN_ANIM_VEL_X_FRAC
+RAPH_SPECIAL_HIT_VEL_Y_FRAC = $80
+use 03:B54A RAPH_SPECIAL_HIT_VEL_Y_FRAC
+MIKE_SPECIAL_START_HURT_TIMER = $02
+use 03:B5C2 MIKE_SPECIAL_START_HURT_TIMER
+CASEY_JUMP_KICK_START_VEL_X_FRAC = $08
+use 03:B839 CASEY_JUMP_KICK_START_VEL_X_FRAC
+WIN_VOICE_BY_STAGE_X = $68
+use 03:BB97 WIN_VOICE_BY_STAGE_X
+ATTACK_OBJ_HIT_CHECK_HIT_DELAY = $18
+use 03:BCF9 ATTACK_OBJ_HIT_CHECK_HIT_DELAY
+INTRO_FIGHTER_SPAWN_X = $90
+use 03:BD91 INTRO_FIGHTER_SPAWN_X
+SPLINTER_LAND_VEL_Y = $FC
+use 03:BF66 SPLINTER_LAND_VEL_Y
+CHAR_SELECT_CHOSEN_VEL_X = $3C
+use 06:8272 CHAR_SELECT_CHOSEN_VEL_X
+AI_INIT_AI_COND_TIME = $C0
+use 0A:80B2 AI_INIT_AI_COND_TIME
+AI_COND_DOWN_TAP_START_AI_COND_TIME = $05
+use 0A:88B5 AI_COND_DOWN_TAP_START_AI_COND_TIME
+AI_COND_DOWN_TAP_END_AI_COND_TIME = $C0
+use 0A:88E8 AI_COND_DOWN_TAP_END_AI_COND_TIME
+AI_COND_DONE_AI_COND_TIME = $C0
+use 0A:8A09 AI_COND_DONE_AI_COND_TIME
+OPTION_INIT_X = $30
+use 0C:801D OPTION_INIT_X
+SHOW_TIMER_SETTING_X = $A8
+use 0C:809C SHOW_TIMER_SETTING_X
+RESET_CURSOR_OBJ_X = $60
+use 0C:8649 RESET_CURSOR_OBJ_X
+CONTINUE_START_PRESSED_VEL_X_FRAC = $80
+use 0C:86C5 CONTINUE_START_PRESSED_VEL_X_FRAC
+VS_SETUP_PALETTES_X_A = $30
+use 0C:88F3 VS_SETUP_PALETTES_X_A
+VS_SETUP_PALETTES_X_B = $A8
+use 0C:88F8 VS_SETUP_PALETTES_X_B
+VS_SETUP_SELECT_LEVEL_VEL_X = $50
+use 0C:8981 VS_SETUP_SELECT_LEVEL_VEL_X
+SHOW_RANKING_FIGHTER_X = $C0
+use 0C:8FD7 SHOW_RANKING_FIGHTER_X
+INTRO_SCREEN_LOAD_X = $80
+use 0C:9131 INTRO_SCREEN_LOAD_X
+ENDING_SCREEN_INIT_X = $70
+use 0C:9664 ENDING_SCREEN_INIT_X
+ENDING_FIGHTER_SET_ANIM_TIMER_ANIM_TIME = $06
+use 0C:97F0 ENDING_FIGHTER_SET_ANIM_TIMER_ANIM_TIME
+CONTINUE_MENU_CURSOR_X = $58
+use 0D:A4AF CONTINUE_MENU_CURSOR_X
+LOAD_PALETTE_SET_FADE_FADE_TIME = $08
+use D3BC LOAD_PALETTE_SET_FADE_FADE_TIME
+PALETTE_FADE_STEP_FADE_TIME = $08
+use D414 PALETTE_FADE_STEP_FADE_TIME
+FADE_TO_WHITE_FADE_TIME = $06
+use D481 FADE_TO_WHITE_FADE_TIME
+FADE_FROM_WHITE_FADE_TIME = $08
+use D4D3 FADE_FROM_WHITE_FADE_TIME
+RESET_BALL_OBJECT_VEL_X = $04
+use DDB0 RESET_BALL_OBJECT_VEL_X
+ADD_PENDING_DAMAGE_SET_HIT_DELAY = $20
+use DEAD ADD_PENDING_DAMAGE_SET_HIT_DELAY
+FIGHT_ROUND_OVER_VEL_X_FRAC = $40
+use E53A FIGHT_ROUND_OVER_VEL_X_FRAC
+FIGHT_BONUS_CARD_WAIT_X = $18
+use E7F1 FIGHT_BONUS_CARD_WAIT_X
+SHOW_CHALLENGE_CARD_RUN_X = $60
+use E8DB SHOW_CHALLENGE_CARD_RUN_X
+TITLE_MENU_CURSOR_X = $50
+use F445 TITLE_MENU_CURSOR_X
+
+; sprite frame / animation index loaded by the routine in the name (the build checks every byte; unverified in play)
+STATE0_BRUN_FRAME = $03
+use 02:885A STATE0_BRUN_FRAME
+HURT_AIR_FALL_ANIM = $03
+use 02:8C86 HURT_AIR_FALL_ANIM
+HURT_BALL_FRAME = $A6
+use 02:8EA4 HURT_BALL_FRAME
+HURT_BALL_ANIM = $05
+use 02:8EBC HURT_BALL_ANIM
+START_HOLD_THROW_TIMER_FRAME = $A2
+use 02:914A START_HOLD_THROW_TIMER_FRAME
+HELD_FALL_STEP_ANIM_A = $06
+use 02:92D4 HELD_FALL_STEP_ANIM_A
+HELD_FALL_STEP_ANIM_B = $03
+use 02:92F0 HELD_FALL_STEP_ANIM_B
+BALL_FLIGHT_STEP0_FRAME = $CA
+use 03:A00E BALL_FLIGHT_STEP0_FRAME
+LAUNCH_BALL_DIRECTION_FRAME_A = $C0
+use 03:A072 LAUNCH_BALL_DIRECTION_FRAME_A
+LAUNCH_BALL_DIRECTION_FRAME_B = $C1
+use 03:A0A4 LAUNCH_BALL_DIRECTION_FRAME_B
+LAUNCH_BALL_DIRECTION_FRAME_C = $C1
+use 03:A0EB LAUNCH_BALL_DIRECTION_FRAME_C
+LAUNCH_BALL_DIRECTION_3_FRAME = $CB
+use 03:A1A0 LAUNCH_BALL_DIRECTION_3_FRAME
+ATK_PHASES_HOTHEAD_FIRE_STEP0_ANIM = $04
+use 03:A5C2 ATK_PHASES_HOTHEAD_FIRE_STEP0_ANIM
+SLOT7_APPEAR_FRAME = $13
+use 03:A8F4 SLOT7_APPEAR_FRAME
+LEO_SPECIAL_END_FRAME = $8D
+use 03:B452 LEO_SPECIAL_END_FRAME
+RAPH_SPECIAL_HIT_ANIM = $04
+use 03:B532 RAPH_SPECIAL_HIT_ANIM
+MIKE_SPECIAL_SPIN_FRAME = $B0
+use 03:B627 MIKE_SPECIAL_SPIN_FRAME
+MIKE_SPECIAL_END_FRAME = $99
+use 03:B66B MIKE_SPECIAL_END_FRAME
+SHREDDER_BOLTS_WAIT_ANIM_A = $0A
+use 03:B7B1 SHREDDER_BOLTS_WAIT_ANIM_A
+SHREDDER_BOLTS_WAIT_ANIM_B = $02
+use 03:B7DC SHREDDER_BOLTS_WAIT_ANIM_B
+CASEY_RAIN_END_FRAME = $A2
+use 03:B8BB CASEY_RAIN_END_FRAME
+HOTHEAD_SPECIAL_ANIM = $04
+use 03:B8EA HOTHEAD_SPECIAL_ANIM
+SHREDDER_WAVE_ANIM = $05
+use 03:B932 SHREDDER_WAVE_ANIM
+CASEY_RAIN_TIMER_FRAME = $A2
+use 03:B980 CASEY_RAIN_TIMER_FRAME
+CHAR_SELECT_INPUT_P2_FRAME = $1A
+use 06:81BF CHAR_SELECT_INPUT_P2_FRAME
+VS_SETUP_SELECT_LEVEL_FRAME_A = $14
+use 0C:8974 VS_SETUP_SELECT_LEVEL_FRAME_A
+VS_SETUP_SELECT_LEVEL_FRAME_B = $15
+use 0C:897C VS_SETUP_SELECT_LEVEL_FRAME_B
+DRAW_VS_LEVEL_SPRITES_FRAME = $14
+use 0C:89BB DRAW_VS_LEVEL_SPRITES_FRAME
+PLACE_VS_CURSOR_FRAME = $15
+use 0C:89F2 PLACE_VS_CURSOR_FRAME
+NAME_ENTRY_PLACE_LETTER_CURSOR_FRAME = $22
+use 0C:8F04 NAME_ENTRY_PLACE_LETTER_CURSOR_FRAME
+NAME_ENTRY_PLACE_SIDE_CURSOR_FRAME = $22
+use 0C:8F3E NAME_ENTRY_PLACE_SIDE_CURSOR_FRAME
+INTRO_MANHATTAN_SETUP_FRAME = $4D
+use 0C:90F1 INTRO_MANHATTAN_SETUP_FRAME
+INTRO_LETTER_SETUP_FRAME = $4E
+use 0C:911A INTRO_LETTER_SETUP_FRAME
+ENDING_WATERFRONT_SETUP_ANIM = $06
+use 0C:96F9 ENDING_WATERFRONT_SETUP_ANIM
+ENDING_FIGHTER_RUN_WAIT_FRAME = $13
+use 0C:97AC ENDING_FIGHTER_RUN_WAIT_FRAME
+ENDING_FIGHTER_JUMP_WAIT_FRAME = $2B
+use 0C:97E1 ENDING_FIGHTER_JUMP_WAIT_FRAME
+ENDING_FIGHTER_WAVE_ANIM_FRAME = $28
+use 0C:9807 ENDING_FIGHTER_WAVE_ANIM_FRAME
+ENDING_FIGHTER_FALL_FRAME = $29
+use 0C:9820 ENDING_FIGHTER_FALL_FRAME
+ENDING_FIGHTER_LAND_WAIT_FRAME = $2A
+use 0C:9832 ENDING_FIGHTER_LAND_WAIT_FRAME
+RANKING_ANIMATE_ANIM = $0C
+use 0D:A085 RANKING_ANIMATE_ANIM
+RANKING_ANIMATE_FRAME = $30
+use 0D:A094 RANKING_ANIMATE_FRAME
+BLINK_FRAME4_C_FRAME = $4C
+use 0D:A40C BLINK_FRAME4_C_FRAME
+
+; Horizontal screen edges for objX compares (fighters stay within about $18-$E9 in a 12 000-frame Mesen bot run, watch of $0440/$0441):
+SCREEN_EDGE_L = $19
+SCREEN_EDGE_R = $E8
+use 03:AA8B 0A:8853 SCREEN_EDGE_R-1
+use 03:AEEA 03:AF06 EE23 SCREEN_EDGE_R
+use 03:AF2D 0A:8863 ECF6 SCREEN_EDGE_L
+
+; limits compared with objY / objTimer / objX / fighterGap by the routine in the name (the build checks every byte; unverified in play)
+KNOCKDOWN_FLY_Y_LIMIT = $C0
+use 02:841D KNOCKDOWN_FLY_Y_LIMIT
+STATE_SHOT_TIMER_LIMIT = $0C
+use 02:84AE STATE_SHOT_TIMER_LIMIT
+STATE0_BRUN_TIMER_LIMIT = $20
+use 02:8864 STATE0_BRUN_TIMER_LIMIT
+STATE0_BRUN_Y_LIMIT = $9C
+use 02:8876 STATE0_BRUN_Y_LIMIT
+WIN_POSE_WAIT_TIMER_LIMIT = $30
+use 02:88D9 WIN_POSE_WAIT_TIMER_LIMIT
+KO_WAIT_OPPONENT_TIMER_LIMIT = $30
+use 02:8A95 KO_WAIT_OPPONENT_TIMER_LIMIT
+PICK_CLOSE_FAR_Y_LIMIT = $A6
+use 02:8AC8 PICK_CLOSE_FAR_Y_LIMIT
+HURT_BALL_TIMER_Y_LIMIT = $A8
+use 02:8D79 HURT_BALL_TIMER_Y_LIMIT
+HOLD_STATE_RUN_TIMER_LIMIT = $80
+use 02:9028 HOLD_STATE_RUN_TIMER_LIMIT
+SPECIAL_TIMER_CHECK_Y_LIMIT = $AE
+use 02:9A58 SPECIAL_TIMER_CHECK_Y_LIMIT
+CASEY_SPECIAL_TIMER48_Y_LIMIT = $AB
+use 02:9BC0 CASEY_SPECIAL_TIMER48_Y_LIMIT
+BALL_FLIGHT_TIMER_LIMIT = $30
+use 02:9F41 BALL_FLIGHT_TIMER_LIMIT
+LAUNCH_BALL_DIRECTION_Y_LIMIT_A = $45
+use 03:A08A LAUNCH_BALL_DIRECTION_Y_LIMIT_A
+LAUNCH_BALL_DIRECTION_Y_LIMIT_B = $A0
+use 03:A0B1 LAUNCH_BALL_DIRECTION_Y_LIMIT_B
+SLOT7_FALL_TIMER_LIMIT = $18
+use 03:A950 SLOT7_FALL_TIMER_LIMIT
+CHECK_HITS_Y_LIMIT_A = $9C
+use 03:AB18 CHECK_HITS_Y_LIMIT_A
+CHECK_HITS_Y_LIMIT_B = $9C
+use 03:ABE7 CHECK_HITS_Y_LIMIT_B
+DON_SPECIAL_RISE_Y_LIMIT = $58
+use 03:B6BC DON_SPECIAL_RISE_Y_LIMIT
+DON_SPECIAL_DIVE_Y_LIMIT = $A8
+use 03:B702 DON_SPECIAL_DIVE_Y_LIMIT
+AI_COND_CHARGE2_GAP_LIMIT = $26
+use 0A:8582 AI_COND_CHARGE2_GAP_LIMIT
+AI_COND_SUB3_Y_LIMIT = $90
+use 0A:86BC AI_COND_SUB3_Y_LIMIT
+AI_COND_HEIGHT_Y_LIMIT = $A0
+use 0A:890A AI_COND_HEIGHT_Y_LIMIT
+AI_COND_WALK_CLOSE_GAP_LIMIT = $09
+use 0A:8A8D AI_COND_WALK_CLOSE_GAP_LIMIT
+AI_LEO_NEAR_CLOSING_CHECK_Y_LIMIT_A = $80
+use 0A:8F71 AI_LEO_NEAR_CLOSING_CHECK_Y_LIMIT_A
+AI_LEO_NEAR_CLOSING_CHECK_Y_LIMIT_B = $98
+use 0A:8F8D AI_LEO_NEAR_CLOSING_CHECK_Y_LIMIT_B
+AI_DON_CLOSE_AIR_CHECK_Y_LIMIT = $80
+use 0A:92DC AI_DON_CLOSE_AIR_CHECK_Y_LIMIT
+AI_DON_MID_Y_LIMIT = $A0
+use 0A:9398 AI_DON_MID_Y_LIMIT
+AI_CASEY_NEAR_Y_LIMIT = $80
+use 0A:967A AI_CASEY_NEAR_Y_LIMIT
+AI_HOTHEAD_CLOSE_Y_LIMIT = $80
+use 0A:988E AI_HOTHEAD_CLOSE_Y_LIMIT
+AI_HOTHEAD_NEAR_Y_LIMIT = $70
+use 0A:98EB AI_HOTHEAD_NEAR_Y_LIMIT
+AI_HOTHEAD_MID_GAP_LIMIT = $38
+use 0A:996B AI_HOTHEAD_MID_GAP_LIMIT
+AI_SHREDDER_NEAR_Y_LIMIT = $98
+use 0A:9AAB AI_SHREDDER_NEAR_Y_LIMIT
+AI_SHREDDER_MID_Y_LIMIT = $88
+use 0A:9B8B AI_SHREDDER_MID_Y_LIMIT
+AI_REACT_VS_LEO_GAP_LIMIT = $2C
+use 0A:9C51 AI_REACT_VS_LEO_GAP_LIMIT
+AI_CASEY_VS_LEO_GAP_LIMIT_A = $40
+use 0A:9E00 AI_CASEY_VS_LEO_GAP_LIMIT_A
+AI_CASEY_VS_LEO_GAP_LIMIT_B = $20
+use 0A:9E1A AI_CASEY_VS_LEO_GAP_LIMIT_B
+AI_CASEY_VS_RAPH_GAP_LIMIT_A = $60
+use 0A:9E40 AI_CASEY_VS_RAPH_GAP_LIMIT_A
+AI_CASEY_VS_RAPH_GAP_LIMIT_B = $40
+use 0A:9E50 AI_CASEY_VS_RAPH_GAP_LIMIT_B
+AI_CASEY_VS_MIKE_GAP_LIMIT = $28
+use 0A:9E92 AI_CASEY_VS_MIKE_GAP_LIMIT
+AI_CASEY_VS_HOTHEAD_GAP_LIMIT = $30
+use 0A:9ED5 AI_CASEY_VS_HOTHEAD_GAP_LIMIT
+AI_REACT_HOTHEAD_Y_LIMIT = $60
+use 0A:9EF6 AI_REACT_HOTHEAD_Y_LIMIT
+AI_HOTHEAD_VS_LEO_Y_LIMIT = $70
+use 0A:9F38 AI_HOTHEAD_VS_LEO_Y_LIMIT
+AI_HOTHEAD_VS_LEO_GAP_LIMIT = $50
+use 0A:9F55 AI_HOTHEAD_VS_LEO_GAP_LIMIT
+AI_HOTHEAD_VS_RAPH_GAP_LIMIT = $40
+use 0A:9F71 AI_HOTHEAD_VS_RAPH_GAP_LIMIT
+AI_SHREDDER_VS_LEO_GAP_LIMIT = $38
+use 0B:A02D AI_SHREDDER_VS_LEO_GAP_LIMIT
+AI_SHREDDER_VS_RAPH_GAP_LIMIT = $10
+use 0B:A04F AI_SHREDDER_VS_RAPH_GAP_LIMIT
+AI_SHREDDER_VS_MIKE_Y_LIMIT = $68
+use 0B:A0A0 AI_SHREDDER_VS_MIKE_Y_LIMIT
+AI_SHREDDER_VS_SHREDDER_GAP_LIMIT = $11
+use 0B:A16F AI_SHREDDER_VS_SHREDDER_GAP_LIMIT
+INTRO_FADE_MUSIC_WAIT_TIMER_LIMIT = $40
+use 0C:91B6 INTRO_FADE_MUSIC_WAIT_TIMER_LIMIT
+ENDING_FIGHTER_MOVE_X_X_LIMIT = $A0
+use 0C:97B8 ENDING_FIGHTER_MOVE_X_X_LIMIT
+ENDING_CREDITS_FADE_WAIT_TIMER_LIMIT = $20
+use 0C:992C ENDING_CREDITS_FADE_WAIT_TIMER_LIMIT
+RANKING_ANIMATE_TIMER_LIMIT = $28
+use 0D:A0A7 RANKING_ANIMATE_TIMER_LIMIT
+FIGHT_FRAME_CLEAR_X_LIMIT_A = $4E
+use E9D2 FIGHT_FRAME_CLEAR_X_LIMIT_A
+FIGHT_FRAME_CLEAR_X_LIMIT_B = $B3
+use E9EB FIGHT_FRAME_CLEAR_X_LIMIT_B
+AI_AWAY_FROM_WALLS_X_LIMIT = $DC
+use ECDC AI_AWAY_FROM_WALLS_X_LIMIT
+
+; start values stored into other variables, named by routine and variable (the build checks every byte; unverified in play)
+ECHO_STORE_SND_TEMP = $04
+use 00:8348 ECHO_STORE_SND_TEMP
+WRITE_NOISE_PERIOD_NOISE_HI = $08
+use 00:89F1 WRITE_NOISE_PERIOD_NOISE_HI
+RESTORE_CHANNEL_TRI_LINEAR = $90
+use 00:8C52 RESTORE_CHANNEL_TRI_LINEAR
+SOUND_START_SND_CHANNELS_LEFT = $03
+use 00:8EAC SOUND_START_SND_CHANNELS_LEFT
+CHANNEL_BIT_SND_CHAN_BIT = $80
+use 00:8F36 CHANNEL_BIT_SND_CHAN_BIT
+CHANNEL_START_TIMER_SND_PERIOD_HI_OUT = $F8
+use 00:8F98 CHANNEL_START_TIMER_SND_PERIOD_HI_OUT
+CHANNEL_START_TIMER_SND_SWEEP = $7F
+use 00:8FAC CHANNEL_START_TIMER_SND_SWEEP
+START_MUSIC_SND_CHANNELS_LEFT = $03
+use 00:903C START_MUSIC_SND_CHANNELS_LEFT
+START_ATTACK_FIGHTER_ATTACKING = $80
+use 02:833A START_ATTACK_FIGHTER_ATTACKING
+STATE_SHOT_OBJ_TIMER = $10
+use 02:849B STATE_SHOT_OBJ_TIMER
+SHOT_THROW_BALL_FIGHTER_HAS_BALL = $80
+use 02:84BC SHOT_THROW_BALL_FIGHTER_HAS_BALL
+STATE_SPECIAL_OBJ_SPRITE_SET = $80
+use 02:86AE STATE_SPECIAL_OBJ_SPRITE_SET
+STATE_CROUCH_OBJ_TIMER = $04
+use 02:871A STATE_CROUCH_OBJ_TIMER
+CROUCH_HOLD_OBJ_TIMER = $04
+use 02:8731 CROUCH_HOLD_OBJ_TIMER
+STATE0_B_HIT_FREEZE = $02
+use 02:87A6 STATE0_B_HIT_FREEZE
+STATE0_B_OBJ_TIMER = $08
+use 02:87BF STATE0_B_OBJ_TIMER
+STATE0_BRUN_HIT_FREEZE = $02
+use 02:87FC STATE0_BRUN_HIT_FREEZE
+KO_START_HIT_FREEZE = $80
+use 02:8999 KO_START_HIT_FREEZE
+KO_START_OBJ_COUNTER = $1E
+use 02:89A1 KO_START_OBJ_COUNTER
+KO_LAUNCH_OBJ_ATTR = $82
+use 02:89E2 KO_LAUNCH_OBJ_ATTR
+HURT_AIR_LAND_OBJ_TIMER = $08
+use 02:8CC3 HURT_AIR_LAND_OBJ_TIMER
+HURT_BALL_GET_UP_OBJ_STEP = $03
+use 02:8DD8 HURT_BALL_GET_UP_OBJ_STEP
+HURT_RAIN_LAND_OBJ_STEP = $04
+use 02:8F01 HURT_RAIN_LAND_OBJ_STEP
+HOLD_STATE_RUN_OBJ_HURT_POWER = $C0
+use 02:900B HOLD_STATE_RUN_OBJ_HURT_POWER
+HOLD_STATE_RUN_OBJ_TIMER = $08
+use 02:9036 HOLD_STATE_RUN_OBJ_TIMER
+HOLD_STATE_RUN_OBJ_STEP = $02
+use 02:909E HOLD_STATE_RUN_OBJ_STEP
+HOLD_THROW_SOUND_OBJ_STEP = $02
+use 02:913B HOLD_THROW_SOUND_OBJ_STEP
+SET_CMD_TIMER20_FIGHTER_CMD_TIMER = $14
+use 02:9DE0 SET_CMD_TIMER20_FIGHTER_CMD_TIMER
+BALL_IDLE_OBJ_BOX = $03
+use 02:9EB8 BALL_IDLE_OBJ_BOX
+LAUNCH_BALL_OBJ_BOX = $03
+use 03:A020 LAUNCH_BALL_OBJ_BOX
+LAUNCH_BALL_OBJ_POWER = $30
+use 03:A025 LAUNCH_BALL_OBJ_POWER
+LAUNCH_BALL_DIRECTION_OBJ_POWER = $40
+use 03:A07C LAUNCH_BALL_DIRECTION_OBJ_POWER
+ATK_SET_POWER_AND_HIT_TYPE_OBJ_HIT_TYPE = $03
+use 03:A539 ATK_SET_POWER_AND_HIT_TYPE_OBJ_HIT_TYPE
+ATK_PHASES_HOTHEAD_FIRE_STEP0_OBJ_POWER = $28
+use 03:A5B8 ATK_PHASES_HOTHEAD_FIRE_STEP0_OBJ_POWER
+TURTLE_POWER_SLOT_OBJ_BOX = $06
+use 03:A857 TURTLE_POWER_SLOT_OBJ_BOX
+CHECK_HITS_OTHER_FIGHTER = $06
+use 03:AA69 CHECK_HITS_OTHER_FIGHTER
+CHECK_HITS_HIT_FREEZE_A = $14
+use 03:AAA4 CHECK_HITS_HIT_FREEZE_A
+CHECK_HITS_OBJ_HURT_POWER = $08
+use 03:AB30 CHECK_HITS_OBJ_HURT_POWER
+CHECK_HITS_HIT_FREEZE_B = $18
+use 03:ABC8 CHECK_HITS_HIT_FREEZE_B
+HIT_REACTION_COMMON_COMBO_TIMER = $3C
+use 03:AC6F HIT_REACTION_COMMON_COMBO_TIMER
+SEPARATE_FIGHTERS_OBJ_VEL_XFRAC = $80
+use 03:AE74 SEPARATE_FIGHTERS_OBJ_VEL_XFRAC
+RAPH_SPECIAL_HIT_OBJ_BOX = $12
+use 03:B516 RAPH_SPECIAL_HIT_OBJ_BOX
+RAPH_SPECIAL_HIT_MOVE_FLAGS = $06
+use 03:B554 RAPH_SPECIAL_HIT_MOVE_FLAGS
+RAPH_SPECIAL_ROLL_OBJ_STEP = $05
+use 03:B584 RAPH_SPECIAL_ROLL_OBJ_STEP
+MIKE_SPECIAL_MOVE_MOVE_FLAGS = $A1
+use 03:B642 MIKE_SPECIAL_MOVE_MOVE_FLAGS
+SET_BOX_HEIGHT20_OBJ_BOX = $14
+use 03:B6EE SET_BOX_HEIGHT20_OBJ_BOX
+DON_SPECIAL_LAND_MOVE_FLAGS = $08
+use 03:B757 DON_SPECIAL_LAND_MOVE_FLAGS
+READ_DASH_INPUT_DASH_TIMER = $1E
+use 03:BAA9 READ_DASH_INPUT_DASH_TIMER
+DASH_ANIM_STEP_OBJ_ATTR = $83
+use 03:BB28 DASH_ANIM_STEP_OBJ_ATTR
+ATTACK_OBJ_HIT_CHECK_PUSH_TIMER = $06
+use 03:BCCE ATTACK_OBJ_HIT_CHECK_PUSH_TIMER
+ATTACK_OBJ_HIT_CHECK_HIT_FREEZE = $14
+use 03:BCD3 ATTACK_OBJ_HIT_CHECK_HIT_FREEZE
+ATTACK_OBJ_HIT_CHECK_OBJ_PHASE = $02
+use 03:BD17 ATTACK_OBJ_HIT_CHECK_OBJ_PHASE
+INTRO_FIGHTER_HP_OBJ_BOX = $09
+use 03:BDBA INTRO_FIGHTER_HP_OBJ_BOX
+INTRO_FIGHTER_HP_OBJ_STATUS = $20
+use 03:BDBF INTRO_FIGHTER_HP_OBJ_STATUS
+INTRO_FIGHTER_WAIT_OBJ_BOX = $1E
+use 03:BDDD INTRO_FIGHTER_WAIT_OBJ_BOX
+INTRO_BANNER_DRAW_OBJ_PHASE = $04
+use 03:BE9C INTRO_BANNER_DRAW_OBJ_PHASE
+INTRO_BANNER_DRAW_OBJ_STATE = $05
+use 03:BEAA INTRO_BANNER_DRAW_OBJ_STATE
+CHAR_SELECT_COMBINE_PHASES_OBJ_ATTR = $81
+use 06:8193 CHAR_SELECT_COMBINE_PHASES_OBJ_ATTR
+CHAR_SELECT_DONE_SELECT_STATE = $04
+use 06:82CC CHAR_SELECT_DONE_SELECT_STATE
+AI_EXEC_BYTE_AI_COND_A = $17
+use 0A:8311 AI_EXEC_BYTE_AI_COND_A
+AI_EXEC_BYTE_AI_COND_B = $18
+use 0A:831B AI_EXEC_BYTE_AI_COND_B
+AI_COND_HOLD_TIMED_AI_HOLD_TIMER = $30
+use 0A:8897 AI_COND_HOLD_TIMED_AI_HOLD_TIMER
+AI_COND_DOWN_TAP_START_AI_PAD_KEEP = $04
+use 0A:88BA AI_COND_DOWN_TAP_START_AI_PAD_KEEP
+AI_COND_DOWN_TAP_HOLD_AI_COND_ARG = $02
+use 0A:88DA AI_COND_DOWN_TAP_HOLD_AI_COND_ARG
+AI_COND_DOWN_ATTACK_STEP3_AI_PAD_KEEP = $04
+use 0A:8964 AI_COND_DOWN_ATTACK_STEP3_AI_PAD_KEEP
+AI_COND_WATCH_DON_AI_COND = $19
+use 0A:89C0 AI_COND_WATCH_DON_AI_COND
+OPTION_INIT_OBJ_ATTR = $82
+use 0C:8022 OPTION_INIT_OBJ_ATTR
+OPTION_INIT_CHR_BANKS = $55
+use 0C:802A OPTION_INIT_CHR_BANKS
+FIGHT_END_BONUS_TITLE_TIMER_ONES = $09
+use 0C:8AEA FIGHT_END_BONUS_TITLE_TIMER_ONES
+DRAW_TEXT_FLICKER_NEXT_DASH_DIR = $04
+use 0C:8B38 DRAW_TEXT_FLICKER_NEXT_DASH_DIR
+DRAW_PROMPT_TEXT_SCREEN_DELAY = $10
+use 0C:8B47 DRAW_PROMPT_TEXT_SCREEN_DELAY
+NAME_ENTRY_INIT_CHR_BANKS = $54
+use 0C:8C9B NAME_ENTRY_INIT_CHR_BANKS
+SET_NAME_ENTRY_REPEAT_FIGHTER_HAS_BALL = $1E
+use 0C:8D12 SET_NAME_ENTRY_REPEAT_FIGHTER_HAS_BALL
+NAME_ENTRY_LETTER_CURSOR_FIGHTER_HAS_BALL = $08
+use 0C:8DF5 NAME_ENTRY_LETTER_CURSOR_FIGHTER_HAS_BALL
+NAME_ENTRY_LETTER_MOVE_NAME_ENTRY_VAR1 = $03
+use 0C:8EA3 NAME_ENTRY_LETTER_MOVE_NAME_ENTRY_VAR1
+NAME_ENTRY_LETTER_MOVE_NAME_ENTRY_VAR2 = $2D
+use 0C:8EA8 NAME_ENTRY_LETTER_MOVE_NAME_ENTRY_VAR2
+NAME_ENTRY_STEP_BACK_NAME_ENTRY_VAR1 = $03
+use 0C:8EFE NAME_ENTRY_STEP_BACK_NAME_ENTRY_VAR1
+NAME_ENTRY_PLACE_SIDE_CURSOR_OBJ_FLIP = $80
+use 0C:8F2C NAME_ENTRY_PLACE_SIDE_CURSOR_OBJ_FLIP
+NAME_ENTRY_NEXT_SLOT_NAME_ENTRY_STEP = $05
+use 0C:8FFD NAME_ENTRY_NEXT_SLOT_NAME_ENTRY_STEP
+NAME_ENTRY_FINISH_PLAYER_NAME_BUF_A = $8D
+use 0C:9013 NAME_ENTRY_FINISH_PLAYER_NAME_BUF_A
+NAME_ENTRY_FINISH_PLAYER_NAME_BUF_B = $9A
+use 0C:9018 NAME_ENTRY_FINISH_PLAYER_NAME_BUF_B
+NAME_ENTRY_FINISH_PLAYER_NAME_BUF_C = $9F
+use 0C:901D NAME_ENTRY_FINISH_PLAYER_NAME_BUF_C
+INTRO_SCREEN_LOAD_CHR_BANKS = $21
+use 0C:9140 INTRO_SCREEN_LOAD_CHR_BANKS
+INTRO_PARADE_START_IRQ_SPLIT_SUB = $03
+use 0C:91E0 INTRO_PARADE_START_IRQ_SPLIT_SUB
+ENDING_SETUP_OBJ_SPRITE_SET = $06
+use 0C:963D ENDING_SETUP_OBJ_SPRITE_SET
+ENDING_SCREEN_INIT_CHR_BANKS = $52
+use 0C:9686 ENDING_SCREEN_INIT_CHR_BANKS
+ENDING_TEXT_MODE_STEP = $0D
+use 0C:96B0 ENDING_TEXT_MODE_STEP
+ENDING_WATERFRONT_SETUP_OBJ_ATTR = $81
+use 0C:9703 ENDING_WATERFRONT_SETUP_OBJ_ATTR
+ENDING_WATERFRONT_SETUP_IRQ_CHR_BANKS_A = $5C
+use 0C:9708 ENDING_WATERFRONT_SETUP_IRQ_CHR_BANKS_A
+ENDING_WATERFRONT_SETUP_IRQ_CHR_BANKS_B = $5E
+use 0C:970C ENDING_WATERFRONT_SETUP_IRQ_CHR_BANKS_B
+ENDING_FIGHTER_JUMP_WAIT_OBJ_FLIP = $40
+use 0C:97E6 ENDING_FIGHTER_JUMP_WAIT_OBJ_FLIP
+ENDING_PORTRAIT_WAIT_MODE_STEP = $0E
+use 0C:98A8 ENDING_PORTRAIT_WAIT_MODE_STEP
+ENDING_CREDITS_SETUP_MODE_STEP = $0B
+use 0C:98BC ENDING_CREDITS_SETUP_MODE_STEP
+ENDING_HARD_MODE_TEXT_MODE_STEP = $0D
+use 0C:9946 ENDING_HARD_MODE_TEXT_MODE_STEP
+STORY_CARD_SEQ5_FIGHTER_CHAR = $06
+use 0D:A139 STORY_CARD_SEQ5_FIGHTER_CHAR
+SET_PALETTE_ENTRY_BALL_INPUT_BITS = $0F
+use D361 SET_PALETTE_ENTRY_BALL_INPUT_BITS
+FADE_FROM_WHITE_PALETTE = $30
+use D4E0 FADE_FROM_WHITE_PALETTE
+START_FADE_OUT_SCREEN_TASK = $80
+use E12E START_FADE_OUT_SCREEN_TASK
+FIGHT_ROUND_SETUP_CAMERA_X = $60
+use E3DB FIGHT_ROUND_SETUP_CAMERA_X
+FIGHT_WIN_POSE_SETUP_LAST_ATTACKER = $03
+use E6B8 FIGHT_WIN_POSE_SETUP_LAST_ATTACKER
+FIGHT_BONUS_CARD_WAIT_CAMERA_X = $08
+use E7CE FIGHT_BONUS_CARD_WAIT_CAMERA_X
+FIGHT_BONUS_CARD_WAIT_TIMER_TENS = $03
+use E7D2 FIGHT_BONUS_CARD_WAIT_TIMER_TENS
+UPDATE_HUD_TIMER_ONES = $09
+use EAEB UPDATE_HUD_TIMER_ONES
+RESET_HIGH_SCORES = $05
+use F1D7 RESET_HIGH_SCORES
+INIT_PPU_SHADOWS_PPU_CTRL_SHADOW = $A8
+use F2C6 INIT_PPU_SHADOWS_PPU_CTRL_SHADOW
+INIT_PPU_SHADOWS_LEFT_COLUMN_TIMER = $05
+use F2D1 INIT_PPU_SHADOWS_LEFT_COLUMN_TIMER
+MODE_TITLE_MODE_TIMER = $80
+use F438 MODE_TITLE_MODE_TIMER
+MODE_DEMO_DEMO_FLAG = $04
+use F4B2 MODE_DEMO_DEMO_FLAG
+MODE_GAME_INIT2_PLAYER_LEVEL = $03
+use F501 MODE_GAME_INIT2_PLAYER_LEVEL
+
+; SetIrqSplit ids = index into tbl_F83C (names come from the handlers; the id is not the number in IrqStageHandlerN: $10 = IrqStageHandler13, $0C = IrqStageHandler10)
+IRQ_SPLIT_H2 = $02
+use 0C:96C1 IRQ_SPLIT_H2
+IRQ_SPLIT_H6 = $05
+use 0C:88E3 IRQ_SPLIT_H6
+IRQ_SPLIT_H5 = $06
+use E2E7 IRQ_SPLIT_H5
+IRQ_SPLIT_H7 = $07
+use 0C:82C1 IRQ_SPLIT_H7
+IRQ_SPLIT_SET_CHR_R0_R1 = $08
+use F02E IRQ_SPLIT_SET_CHR_R0_R1
+IRQ_SPLIT_CAMERA_SPLIT = $09
+use E7FB IRQ_SPLIT_CAMERA_SPLIT
+IRQ_SPLIT_H9 = $0A
+use 06:8100 IRQ_SPLIT_H9
+IRQ_SPLIT_H8 = $0B
+use 0C:90DB 0C:9633 0C:9847 E8B7 IRQ_SPLIT_H8
+IRQ_SPLIT_H10 = $0C
+use 0C:9FD6 IRQ_SPLIT_H10
+IRQ_SPLIT_SET_CHR_ACK_7C = $0D
+use 0C:85F6 IRQ_SPLIT_SET_CHR_ACK_7C
+IRQ_SPLIT_H11 = $0E
+use 0C:8031 IRQ_SPLIT_H11
+IRQ_SPLIT_H12 = $0F
+use 0D:A431 IRQ_SPLIT_H12
+IRQ_SPLIT_H13 = $10
+use 0C:91DB IRQ_SPLIT_H13
+
+; durations passed to ScaleTime (named by the routine; the build checks every byte; unverified in play)
+START_TURN_SCALE = $06
+use 02:83B7 START_TURN_SCALE
+HURT_RAIN_RUN_SCALE = $05
+use 02:8EDA HURT_RAIN_RUN_SCALE
+START_HOLD_THROW_TIMER_SCALE = $28
+use 02:9145 START_HOLD_THROW_TIMER_SCALE
+SET_HOLD_TIMER_SCALE = $14
+use 02:916B SET_HOLD_TIMER_SCALE
+RAPH_INPUT_SCALE = $76
+use 02:9AE9 RAPH_INPUT_SCALE
+ATK_PHASES27_STEP0_SCALE = $06
+use 03:A370 ATK_PHASES27_STEP0_SCALE
+ATK_PHASES_SHREDDER_WAVE_STEP0_SCALE = $08
+use 03:A3DE ATK_PHASES_SHREDDER_WAVE_STEP0_SCALE
+SHREDDER_WAVE_NEXT_SCALE = $1C
+use 03:A3FC SHREDDER_WAVE_NEXT_SCALE
+ATK_PHASES_HOTHEAD_FIRE_STEP1_SCALE = $07
+use 03:A5F4 ATK_PHASES_HOTHEAD_FIRE_STEP1_SCALE
+ATK_PHASES_CASEY_RAIN_STEP0_SCALE = $30
+use 03:A64A ATK_PHASES_CASEY_RAIN_STEP0_SCALE
+ATK_PHASES_CASEY_RAIN_STEP1_SCALE = $40
+use 03:A694 ATK_PHASES_CASEY_RAIN_STEP1_SCALE
+LEO_SPECIAL_START_SCALE = $08
+use 03:B36D LEO_SPECIAL_START_SCALE
+LEO_SPECIAL_SPIN_ANIM_SCALE = $03
+use 03:B3F5 LEO_SPECIAL_SPIN_ANIM_SCALE
+SET_TIMER6_SCALE = $06
+use 03:B4C5 SET_TIMER6_SCALE
+RAPH_SPECIAL_ROLL_SCALE = $08
+use 03:B589 RAPH_SPECIAL_ROLL_SCALE
+SET_TIMER_SCALED6_SCALE = $06
+use 03:B5CC SET_TIMER_SCALED6_SCALE
+MIKE_SPECIAL_PICK_FRAME_SCALE = $1E
+use 03:B5FB MIKE_SPECIAL_PICK_FRAME_SCALE
+MIKE_SPECIAL_SPIN_SCALE = $08
+use 03:B637 MIKE_SPECIAL_SPIN_SCALE
+MIKE_SPECIAL_MOVE_SCALE = $0A
+use 03:B65F MIKE_SPECIAL_MOVE_SCALE
+DON_SPECIAL_RISE_SCALE = $08
+use 03:B6C3 DON_SPECIAL_RISE_SCALE
+DON_SPECIAL_SPAWN_SECOND_SCALE = $0C
+use 03:B738 DON_SPECIAL_SPAWN_SECOND_SCALE
+CASEY_JUMP_KICK_FRAME_SCALE = $12
+use 03:B8A8 CASEY_JUMP_KICK_FRAME_SCALE
+HOTHEAD_SPECIAL_SCALE = $06
+use 03:B8E2 HOTHEAD_SPECIAL_SCALE
+UPDATE_HUD_SCALE = $4E
+use EAC4 UPDATE_HUD_SCALE
+
+; A arguments of subroutine calls, named by caller routine and callee (the build checks every byte; unverified in play)
+REST_START_WRITE_SWEEP_REG_ARG = $7F
+use 00:86F0 REST_START_WRITE_SWEEP_REG_ARG
+SET_WALK_VEL_X_SUB_ONE_FROM_PTR0_ARG_A = $F0
+use 02:813A SET_WALK_VEL_X_SUB_ONE_FROM_PTR0_ARG_A
+SET_WALK_VEL_X_SUB_ONE_FROM_PTR0_ARG_B = $F0
+use 02:8144 SET_WALK_VEL_X_SUB_ONE_FROM_PTR0_ARG_B
+KNOCKDOWN_FLY_SET_VEL_XFACING_ARG = $61
+use 02:83F9 KNOCKDOWN_FLY_SET_VEL_XFACING_ARG
+KNOCKDOWN_FLY_SET_VEL_YPACKED_ARG = $80
+use 02:840D KNOCKDOWN_FLY_SET_VEL_YPACKED_ARG
+SHOT_TO_CROUCH_SET_FIGHTER_STATE_ARG = $07
+use 02:84D2 SHOT_TO_CROUCH_SET_FIGHTER_STATE_ARG
+STATE_TURN_SET_FIGHTER_STATE_ARG = $07
+use 02:86F8 STATE_TURN_SET_FIGHTER_STATE_ARG
+START_AIR_HURT_SET_FIGHTER_STATE_ARG = $03
+use 02:87E2 START_AIR_HURT_SET_FIGHTER_STATE_ARG
+STATE0_BRUN_SCALE_DAMAGE_ARG = $04
+use 02:8800 STATE0_BRUN_SCALE_DAMAGE_ARG
+RUN_MOVE_ADD_VEL_YFRAC_ARG = $10
+use 02:8B16 RUN_MOVE_ADD_VEL_YFRAC_ARG
+RUN_MOVE_SUB_VEL_YFRAC_ARG = $D8
+use 02:8B43 RUN_MOVE_SUB_VEL_YFRAC_ARG
+HURT_AIR_LAND_SET_VEL_XBACKWARD_ARG = $81
+use 02:8C9C HURT_AIR_LAND_SET_VEL_XBACKWARD_ARG
+HURT_RAIN_LAND_SCALE_DAMAGE_ARG = $04
+use 02:8F0F HURT_RAIN_LAND_SCALE_DAMAGE_ARG
+HURT_LANDING_FACE_SET_FIGHTER_STATE_ARG = $07
+use 02:8F92 HURT_LANDING_FACE_SET_FIGHTER_STATE_ARG
+LAUNCH_BALL_DIRECTION_LAUNCH_BALL_ARG_A = $83
+use 03:A068 LAUNCH_BALL_DIRECTION_LAUNCH_BALL_ARG_A
+LAUNCH_BALL_DIRECTION_LAUNCH_BALL_ARG_B = $03
+use 03:A0C0 LAUNCH_BALL_DIRECTION_LAUNCH_BALL_ARG_B
+LAUNCH_BALL_DIRECTION_2_LAUNCH_BALL_ARG = $03
+use 03:A143 LAUNCH_BALL_DIRECTION_2_LAUNCH_BALL_ARG
+LAUNCH_BALL_DIRECTION_3_LAUNCH_BALL_ARG = $83
+use 03:A18F LAUNCH_BALL_DIRECTION_3_LAUNCH_BALL_ARG
+ATK_PHASES_HOTHEAD_FIRE_STEP1_SET_VEL_XFACING_ARG = $C0
+use 03:A5E2 ATK_PHASES_HOTHEAD_FIRE_STEP1_SET_VEL_XFACING_ARG
+CHECK_HITS_HIT_REACTION_ARG = $0D
+use 03:AB4F CHECK_HITS_HIT_REACTION_ARG
+DRAW_SCORES_PPU_QUEUE_START_ROW_ARG = $20
+use 03:B011 DRAW_SCORES_PPU_QUEUE_START_ROW_ARG
+DRAW_SCORES_PPU_QUEUE_PUT_XNO_LEN_ARG = $9A
+use 03:B01E DRAW_SCORES_PPU_QUEUE_PUT_XNO_LEN_ARG
+RAPH_SPECIAL_ANIM_WAIT_SET_SPECIAL_VEL_X_ARG = $C2
+use 03:B4F1 RAPH_SPECIAL_ANIM_WAIT_SET_SPECIAL_VEL_X_ARG
+MIKE_SPECIAL_PICK_FRAME_SET_SPECIAL_VEL_X_ARG = $03
+use 03:B5F6 MIKE_SPECIAL_PICK_FRAME_SET_SPECIAL_VEL_X_ARG
+DON_SPECIAL_LAUNCH_START_ANIM_ARG = $03
+use 03:B68C DON_SPECIAL_LAUNCH_START_ANIM_ARG
+DON_SPECIAL_HANG_SET_VEL_YPACKED_ARG = $81
+use 03:B6E4 DON_SPECIAL_HANG_SET_VEL_YPACKED_ARG
+DON_SPECIAL_DIVE_ADD_VEL_YFRAC_ARG = $50
+use 03:B6F7 DON_SPECIAL_DIVE_ADD_VEL_YFRAC_ARG
+DON_SPECIAL_SPAWN_SECOND_START_ANIM_ARG = $02
+use 03:B72E DON_SPECIAL_SPAWN_SECOND_START_ANIM_ARG
+SHREDDER_BOLTS_WAIT_SET_TIMER_SCALED_ARG = $40
+use 03:B79A SHREDDER_BOLTS_WAIT_SET_TIMER_SCALED_ARG
+CASEY_JUMP_KICK_RISE_SET_VEL_XFACING_ARG = $11
+use 03:B85A CASEY_JUMP_KICK_RISE_SET_VEL_XFACING_ARG
+SPECIAL_FALL_STEP_SCALE_SPEED_ARG = $48
+use 03:B9B9 SPECIAL_FALL_STEP_SCALE_SPEED_ARG
+CASEY_RAIN_DASH_SET_VEL_XFACING_ARG = $C0
+use 03:B9D6 CASEY_RAIN_DASH_SET_VEL_XFACING_ARG
+DRAW_FIGHT_BANNER_PPU_QUEUE_PUT_X_ARG = $55
+use 03:BF09 DRAW_FIGHT_BANNER_PPU_QUEUE_PUT_X_ARG
+CHAR_SELECT_PALETTE_SETUP_LOAD_PALETTE_SETS_ARG = $13
+use 06:811D CHAR_SELECT_PALETTE_SETUP_LOAD_PALETTE_SETS_ARG
+CHAR_SELECT_FILL_QUEUE_PPU_QUEUE_PUT_X_ARG_A = $D0
+use 06:82D9 CHAR_SELECT_FILL_QUEUE_PPU_QUEUE_PUT_X_ARG_A
+CHAR_SELECT_FILL_QUEUE_PPU_QUEUE_PUT_X_ARG_B = $23
+use 06:82DE CHAR_SELECT_FILL_QUEUE_PPU_QUEUE_PUT_X_ARG_B
+CHAR_SELECT_FILL_QUEUE_PPU_QUEUE_PUT_X_ARG_C = $1F
+use 06:82E3 CHAR_SELECT_FILL_QUEUE_PPU_QUEUE_PUT_X_ARG_C
+CHAR_SELECT_FILL_QUEUE_PPU_QUEUE_START_ROW_ARG_A = $23
+use 06:830F CHAR_SELECT_FILL_QUEUE_PPU_QUEUE_START_ROW_ARG_A
+CHAR_SELECT_FILL_QUEUE_PPU_QUEUE_START_ROW_ARG_B = $23
+use 06:831F CHAR_SELECT_FILL_QUEUE_PPU_QUEUE_START_ROW_ARG_B
+TOURNAMENT_SCREEN_INIT_LOAD_PALETTE_SET_ARG = $15
+use 0C:8363 TOURNAMENT_SCREEN_INIT_LOAD_PALETTE_SET_ARG
+VS_SETUP_PALETTES_LOAD_PALETTE_SETS_ARG = $02
+use 0C:88BC VS_SETUP_PALETTES_LOAD_PALETTE_SETS_ARG
+FIGHT_END_BONUS_TITLE_DRAW_TEXT_FLICKER_ARG = $16
+use 0C:8AD9 FIGHT_END_BONUS_TITLE_DRAW_TEXT_FLICKER_ARG
+FIGHT_END_BONUS_DRAW_DRAW_TEXT_FLICKER_ARG = $18
+use 0C:8B7B FIGHT_END_BONUS_DRAW_DRAW_TEXT_FLICKER_ARG
+ADD_DIGITS_TO_TOTALS_PPU_QUEUE_START_ROW_ARG_A = $23
+use 0C:8BF6 ADD_DIGITS_TO_TOTALS_PPU_QUEUE_START_ROW_ARG_A
+ADD_DIGITS_TO_TOTALS_PPU_QUEUE_START_ROW_ARG_B = $23
+use 0C:8C14 ADD_DIGITS_TO_TOTALS_PPU_QUEUE_START_ROW_ARG_B
+ADD_DIGITS_TO_TOTALS_PPU_QUEUE_PUSH_ARG = $81
+use 0C:8C19 ADD_DIGITS_TO_TOTALS_PPU_QUEUE_PUSH_ARG
+ADD_DIGITS_TO_TOTALS_PPU_QUEUE_START_ROW_ARG_C = $23
+use 0C:8C39 ADD_DIGITS_TO_TOTALS_PPU_QUEUE_START_ROW_ARG_C
+NAME_ENTRY_NEXT_PLAYER_PPU_QUEUE_PUSH_ARG = $04
+use 0C:8CFA NAME_ENTRY_NEXT_PLAYER_PPU_QUEUE_PUSH_ARG
+NAME_ENTRY_DRAW_LETTER_PPU_QUEUE_START_ROW_ARG = $21
+use 0C:8EB8 NAME_ENTRY_DRAW_LETTER_PPU_QUEUE_START_ROW_ARG
+QUEUE_TWO_BYTES_PPU_QUEUE_START_ROW_ARG = $22
+use 0C:9374 QUEUE_TWO_BYTES_PPU_QUEUE_START_ROW_ARG
+ZERO_AIF_NO_DIVIDEND_PPU_QUEUE_PUSH_ARG = $81
+use 0C:9512 ZERO_AIF_NO_DIVIDEND_PPU_QUEUE_PUSH_ARG
+ENDING_WATERFRONT_SETUP_LOAD_PALETTE_SETS_ARG = $02
+use 0C:96CD ENDING_WATERFRONT_SETUP_LOAD_PALETTE_SETS_ARG
+ENDING_FIGHTER_RUN_WAIT_SET_OBJ_VEL_XPACKED_ARG = $A0
+use 0C:979F ENDING_FIGHTER_RUN_WAIT_SET_OBJ_VEL_XPACKED_ARG
+ENDING_FIGHTER_JUMP_WAIT_SET_PALETTE_ENTRY_ARG_A = $02
+use 0C:97D5 ENDING_FIGHTER_JUMP_WAIT_SET_PALETTE_ENTRY_ARG_A
+ENDING_FIGHTER_JUMP_WAIT_SET_PALETTE_ENTRY_ARG_B = $3B
+use 0C:97DC ENDING_FIGHTER_JUMP_WAIT_SET_PALETTE_ENTRY_ARG_B
+ENDING_SPLINTER_SETUP_LOAD_PALETTE_SET_ARG = $1A
+use 0C:9855 ENDING_SPLINTER_SETUP_LOAD_PALETTE_SET_ARG
+STORY_CARD_PALETTES_LOAD_PALETTE_SET_ARG = $14
+use 0D:A1C4 STORY_CARD_PALETTES_LOAD_PALETTE_SET_ARG
+REMATCH_PROMPT_FAR_CALL_A0_E3_ARG = $03
+use 0D:A45A REMATCH_PROMPT_FAR_CALL_A0_E3_ARG
+REMATCH_PROMPT_SET_PALETTE_ENTRY_ARG = $64
+use 0D:A461 REMATCH_PROMPT_SET_PALETTE_ENTRY_ARG
+LOAD_PALETTE_SET_FADE_FADE_TIMER_STEP_ARG = $08
+use D3C1 LOAD_PALETTE_SET_FADE_FADE_TIMER_STEP_ARG
+FADE_TO_WHITE_FADE_TIMER_STEP_ARG = $0C
+use D487 FADE_TO_WHITE_FADE_TIMER_STEP_ARG
+FADE_FROM_WHITE_FADE_TIMER_STEP_ARG = $08
+use D4EB FADE_FROM_WHITE_FADE_TIMER_STEP_ARG
+PALETTE_UPLOAD_RUN_PPU_QUEUE_PUT_XNO_LEN_ARG = $3F
+use D564 PALETTE_UPLOAD_RUN_PPU_QUEUE_PUT_XNO_LEN_ARG
+FIGHT_VS_SCREEN_DRAW_FIGHTER_NAMES_ARG = $04
+use E2CB FIGHT_VS_SCREEN_DRAW_FIGHTER_NAMES_ARG
+FIGHT_WIN_POSE_SETUP_STOP_SOUND_AND_PLAY_ARG = $17
+use E6A9 FIGHT_WIN_POSE_SETUP_STOP_SOUND_AND_PLAY_ARG
+DRAW_TIMER_DIGIT_LOOP_PPU_QUEUE_PUT_XNO_LEN_ARG = $20
+use EB15 DRAW_TIMER_DIGIT_LOOP_PPU_QUEUE_PUT_XNO_LEN_ARG
+TITLE_SCREEN_INIT_LOAD_PALETTE_SETS_ARG = $1B
+use F013 TITLE_SCREEN_INIT_LOAD_PALETTE_SETS_ARG
+LOAD_SCREEN_DATA_ADD_TO_PTR_ARG = $02
+use F07D LOAD_SCREEN_DATA_ADD_TO_PTR_ARG
+MODE_DEMO_GO_MODE_STOP_SOUND_ARG = $0C
+use F4C7 MODE_DEMO_GO_MODE_STOP_SOUND_ARG
+
+; operands of CMP / AND / ORA / EOR / ADC / SBC right after LDA <variable>, named by routine, variable and operation (the build checks every byte; unverified in play)
+UPDATE_CHANNEL_SND_RELEASE_LIMIT = $10
+use 00:80BE UPDATE_CHANNEL_SND_RELEASE_LIMIT
+UPDATE_CHANNEL_SND_FADE_MASK = $0F
+use 00:814D UPDATE_CHANNEL_SND_FADE_MASK
+UPDATE_CHANNEL_SND_ECHO_FLAGS_MASK_A = $0C
+use 00:8178 UPDATE_CHANNEL_SND_ECHO_FLAGS_MASK_A
+UPDATE_CHANNEL_SND_ECHO_FLAGS_MASK_B = $0C
+use 00:818C UPDATE_CHANNEL_SND_ECHO_FLAGS_MASK_B
+UPDATE_CHANNEL_SND_DUTY_FLAGS_MASK = $02
+use 00:81A7 UPDATE_CHANNEL_SND_DUTY_FLAGS_MASK
+WRITE_VOL_FLAGS_SND_DUTY_FLAGS_MASK = $F0
+use 00:81B5 WRITE_VOL_FLAGS_SND_DUTY_FLAGS_MASK
+VIBRATO_NEXT_SND_VIB_DEPTH_MASK = $0F
+use 00:8299 VIBRATO_NEXT_SND_VIB_DEPTH_MASK
+VIBRATO_SCALE_DEPTH_SND_VIB_DEPTH_MASK = $0F
+use 00:82CE VIBRATO_SCALE_DEPTH_SND_VIB_DEPTH_MASK
+NOTE_LENGTH_BOUNDARY_SND_ECHO_FLAGS_MASK = $10
+use 00:8302 NOTE_LENGTH_BOUNDARY_SND_ECHO_FLAGS_MASK
+ECHO_PERIOD_LOAD_SND_ECHO_FLAGS_MASK = $03
+use 00:831F ECHO_PERIOD_LOAD_SND_ECHO_FLAGS_MASK
+ECHO_STORE_SND_ECHO_FLAGS_MASK_A = $20
+use 00:8344 ECHO_STORE_SND_ECHO_FLAGS_MASK_A
+ECHO_STORE_SND_ECHO_FLAGS_MASK_B = $DF
+use 00:8368 ECHO_STORE_SND_ECHO_FLAGS_MASK_B
+ECHO_STORE_SND_ECHO_IDX_MASK = $03
+use 00:8375 ECHO_STORE_SND_ECHO_IDX_MASK
+CHANNEL_VOLUME_SFX_HEADER_MASK_MASK = $08
+use 00:83A3 CHANNEL_VOLUME_SFX_HEADER_MASK_MASK
+NOTE_TIMER_START_SND_BYTE_LIMIT = $C0
+use 00:8435 NOTE_TIMER_START_SND_BYTE_LIMIT
+SET_NOTE_TIMER_SND_BYTE_MASK_A = $0F
+use 00:84A3 SET_NOTE_TIMER_SND_BYTE_MASK_A
+SET_NOTE_TIMER_SND_BYTE_MASK_B = $F0
+use 00:84D0 SET_NOTE_TIMER_SND_BYTE_MASK_B
+ENVELOPE_START_SND_ENV_ID_MASK = $0F
+use 00:8548 ENVELOPE_START_SND_ENV_ID_MASK
+ADD_DETUNE_SND_DETUNE_MASK = $7F
+use 00:863D ADD_DETUNE_SND_DETUNE_MASK
+WRITE_TRI_LINEAR_SND_RELEASE_LIMIT = $10
+use 00:864C WRITE_TRI_LINEAR_SND_RELEASE_LIMIT
+PLAY_DRUM_DRUM_SOUNDS_LIMIT = $47
+use 00:8669 PLAY_DRUM_DRUM_SOUNDS_LIMIT
+CMD_REST_SND_PACKED_MASK = $10
+use 00:86D9 CMD_REST_SND_PACKED_MASK
+REST_START_SND_CHAN_ID_LIMIT = $04
+use 00:8700 REST_START_SND_CHAN_ID_LIMIT
+RELEASE_PACKED_CHECK_SND_PACKED_LIMIT = $80
+use 00:8756 RELEASE_PACKED_CHECK_SND_PACKED_LIMIT
+RELEASE_PACKED_CHECK_SFX_HEADER_IDX_MASK = $81
+use 00:8770 RELEASE_PACKED_CHECK_SFX_HEADER_IDX_MASK
+CMD_SET_VIBRATO_SND_VIB_FLAGS_BITS = $80
+use 00:8800 CMD_SET_VIBRATO_SND_VIB_FLAGS_BITS
+CMD_SET_VIBRATO_SND_VIB_FLAGS_MASK = $7F
+use 00:880B CMD_SET_VIBRATO_SND_VIB_FLAGS_MASK
+READ_SFX_SFX_HEADER_MASK = $0F
+use 00:88CD READ_SFX_SFX_HEADER_MASK
+READ_SFX_SND_VIB_FLAGS_BITS = $20
+use 00:88FD READ_SFX_SND_VIB_FLAGS_BITS
+READ_SFX_SND_DUTY_MASK = $10
+use 00:894C READ_SFX_SND_DUTY_MASK
+WRITE_PERIOD_REGS_SND_VIB_FLAGS_MASK = $20
+use 00:89CE WRITE_PERIOD_REGS_SND_VIB_FLAGS_MASK
+WRITE_PERIOD_REGS_SND_DUTY_MASK = $10
+use 00:89D5 WRITE_PERIOD_REGS_SND_DUTY_MASK
+WRITE_PERIOD_HI_SND_VIB_FLAGS_MASK = $DF
+use 00:89E4 WRITE_PERIOD_HI_SND_VIB_FLAGS_MASK
+CMD_SLIDE_SFX_SKIP_MASK = $7F
+use 00:8AAA CMD_SLIDE_SFX_SKIP_MASK
+JUMP_TO_PTR_ADVANCE_SND_PACKED_MASK = $10
+use 00:8BAC JUMP_TO_PTR_ADVANCE_SND_PACKED_MASK
+SFX_CHANNEL_LOOP_SND_NEW_ID_LIMIT = $04
+use 00:8EE0 SFX_CHANNEL_LOOP_SND_NEW_ID_LIMIT
+SFX_CHANNEL_LOOP_SND_CHAN_ID_LIMIT = $04
+use 00:8EE7 SFX_CHANNEL_LOOP_SND_CHAN_ID_LIMIT
+KNOCKDOWN_FLY_OBJ_STEP_LIMIT = $02
+use 02:8427 KNOCKDOWN_FLY_OBJ_STEP_LIMIT
+RELEASE_BALL_OBJ_Y_SUB = $28
+use 02:84F0 RELEASE_BALL_OBJ_Y_SUB
+STATE_JUMP_OBJ_VEL_Y_LIMIT = $04
+use 02:85A5 STATE_JUMP_OBJ_VEL_Y_LIMIT
+STATE0_B_OBJ_TIMER_MASK = $03
+use 02:87A2 STATE0_B_OBJ_TIMER_MASK
+BLINK_FRAME_OBJ_TIMER_MASK = $04
+use 02:87C7 BLINK_FRAME_OBJ_TIMER_MASK
+STATE0_BRUN_OBJ_Y_SUB = $10
+use 02:882D STATE0_BRUN_OBJ_Y_SUB
+STOP_IF_TIME_UP_TIMER_SETTING_LIMIT = $03
+use 02:8972 STOP_IF_TIME_UP_TIMER_SETTING_LIMIT
+RUN_MOVE_FIGHTER_MOVE_ID_LIMIT_A = $20
+use 02:8B12 RUN_MOVE_FIGHTER_MOVE_ID_LIMIT_A
+RUN_MOVE_FIGHTER_MOVE_ID_LIMIT_B = $09
+use 02:8B2A RUN_MOVE_FIGHTER_MOVE_ID_LIMIT_B
+RUN_MOVE_FIGHTER_MOVE_TIMER_LIMIT = $04
+use 02:8B7C RUN_MOVE_FIGHTER_MOVE_TIMER_LIMIT
+HURT_STAND_POWER_OBJ_HURT_POWER_LIMIT = $10
+use 02:8C45 HURT_STAND_POWER_OBJ_HURT_POWER_LIMIT
+HURT_RECOVER_FRAME_OBJ_HURT_TIMER_LIMIT = $08
+use 02:8C64 HURT_RECOVER_FRAME_OBJ_HURT_TIMER_LIMIT
+HOLD_STATE_RUN_OBJ_STEP_LIMIT = $02
+use 02:904E HOLD_STATE_RUN_OBJ_STEP_LIMIT
+HELD_FIGHTER_CHECK_OBJ_ANIM_INDEX_LIMIT = $05
+use 02:91D1 HELD_FIGHTER_CHECK_OBJ_ANIM_INDEX_LIMIT
+HELD_FALL_STEP_OBJ_STEP_LIMIT = $04
+use 02:92B1 HELD_FALL_STEP_OBJ_STEP_LIMIT
+HELD_ANIM_STEP_OBJ_SPRITE_SET_SUB = $04
+use 02:9314 HELD_ANIM_STEP_OBJ_SPRITE_SET_SUB
+SHREDDER_SPECIAL_CHECK_SPECIAL2_STAGE_LIMIT = $03
+use 02:9C94 SHREDDER_SPECIAL_CHECK_SPECIAL2_STAGE_LIMIT
+READ_BALL_INPUT_BALL_INPUT_BITS_MASK = $C0
+use 02:9DA3 READ_BALL_INPUT_BALL_INPUT_BITS_MASK
+SET_CMD_TIMER20_FIGHTER_CMD_TIMER_LIMIT = $1E
+use 02:9E06 SET_CMD_TIMER20_FIGHTER_CMD_TIMER_LIMIT
+BALL_WAIT_TIMER_OBJ_PHASE_SUB = $04
+use 02:9F26 BALL_WAIT_TIMER_OBJ_PHASE_SUB
+ATK_PHASES18_STEP1_FIGHTER_MOVE_STEP_LIMIT = $07
+use 03:A399 ATK_PHASES18_STEP1_FIGHTER_MOVE_STEP_LIMIT
+ATK_PHASES15_STEP1_FIGHTER_MOVE_STEP_LIMIT = $06
+use 03:A3BF ATK_PHASES15_STEP1_FIGHTER_MOVE_STEP_LIMIT
+ATK_PHASES_MIKE_A_STEP1_OBJ_FRAME_LIMIT = $E4
+use 03:A4BC ATK_PHASES_MIKE_A_STEP1_OBJ_FRAME_LIMIT
+ATK_PHASES_MIKE_B_STEP1_OBJ_FRAME_LIMIT = $B0
+use 03:A4C7 ATK_PHASES_MIKE_B_STEP1_OBJ_FRAME_LIMIT
+ATK_PHASES_DON_STEP1_OBJ_FRAME_LIMIT = $B5
+use 03:A4D2 ATK_PHASES_DON_STEP1_OBJ_FRAME_LIMIT
+ATK_PHASES_SHREDDER_BOLT_STEP1_OBJ_HURT_TIMER_MASK = $03
+use 03:A565 ATK_PHASES_SHREDDER_BOLT_STEP1_OBJ_HURT_TIMER_MASK
+ATK_PHASES_CASEY_STEP1_OBJ_FRAME_LIMIT = $AE
+use 03:A595 ATK_PHASES_CASEY_STEP1_OBJ_FRAME_LIMIT
+ATK_PHASES_CASEY_RAIN_STEP1_OBJ_HIT_TYPE_LIMIT = $08
+use 03:A68D ATK_PHASES_CASEY_RAIN_STEP1_OBJ_HIT_TYPE_LIMIT
+TURTLE_POWER_SLOT_OBJ_SPRITE_SET_LIMIT = $18
+use 03:A885 TURTLE_POWER_SLOT_OBJ_SPRITE_SET_LIMIT
+SLOT7_SPAWN_TIMER_TENS_LIMIT = $03
+use 03:A8DB SLOT7_SPAWN_TIMER_TENS_LIMIT
+SLOT7_MOVE_OBJ_X_MASK = $FC
+use 03:A92A SLOT7_MOVE_OBJ_X_MASK
+SLOT7_FALL_OBJ_Y_ADD = $20
+use 03:A973 SLOT7_FALL_OBJ_Y_ADD
+CHECK_HITS_OBJ_SPRITE_SET_MASK = $7F
+use 03:ABA1 CHECK_HITS_OBJ_SPRITE_SET_MASK
+SEPARATE_FIGHTERS_OBJ_VEL_X_ADD = $02
+use 03:AEA8 SEPARATE_FIGHTERS_OBJ_VEL_X_ADD
+SEPARATE_FIGHTERS_OBJ_VEL_X_SUB = $02
+use 03:AEB1 SEPARATE_FIGHTERS_OBJ_VEL_X_SUB
+FIGHTERS_EDGE_CHECK_OBJ_VEL_XFRAC_ADD = $80
+use 03:AF3A FIGHTERS_EDGE_CHECK_OBJ_VEL_XFRAC_ADD
+DRAW_SCORES_SCORE_ADD = $81
+use 03:B03E DRAW_SCORES_SCORE_ADD
+DRAW_SCORES_LOW_TENS_ADD = $81
+use 03:B053 DRAW_SCORES_LOW_TENS_ADD
+DRAW_SCORES_LOW_ONES_ADD = $81
+use 03:B05C DRAW_SCORES_LOW_ONES_ADD
+ADD_SCORE_FOR_HIT_OBJ_SPRITE_SET_MASK = $7F
+use 03:B099 ADD_SCORE_FOR_HIT_OBJ_SPRITE_SET_MASK
+NEAR_BALL_BALL_OWNER_MASK = $C0
+use 03:B122 NEAR_BALL_BALL_OWNER_MASK
+SET_FIGHTER_CHR_BANKS_OBJ_FRAME_MASK = $7F
+use 03:B161 SET_FIGHTER_CHR_BANKS_OBJ_FRAME_MASK
+RAPH_SPECIAL_ANIM_WAIT_SPECIAL_CHARGE_SUB = $0A
+use 03:B4FF RAPH_SPECIAL_ANIM_WAIT_SPECIAL_CHARGE_SUB
+STEP_FLIP_ANIM4_OBJ_ANIM_INDEX_MASK = $03
+use 03:B714 STEP_FLIP_ANIM4_OBJ_ANIM_INDEX_MASK
+CASEY_RAIN_DASH_OBJ_ANIM_INDEX_LIMIT = $04
+use 03:B9EA CASEY_RAIN_DASH_OBJ_ANIM_INDEX_LIMIT
+DASH_ANIM_TOURNAMENT_ROUND_COUNTER_ADD = $06
+use 03:BB4D DASH_ANIM_TOURNAMENT_ROUND_COUNTER_ADD
+WIN_VOICE_SELECT_LAST_ATTACKER_LIMIT = $03
+use 03:BB61 WIN_VOICE_SELECT_LAST_ATTACKER_LIMIT
+FIGHT_FRAME_DIV_COUNT_SUB = $04
+use 03:BBC7 FIGHT_FRAME_DIV_COUNT_SUB
+PUSH_FIGHTER_FROM_OPPONENT_BOX_HALF_WIDTH_ADD = $0C
+use 03:BD56 PUSH_FIGHTER_FROM_OPPONENT_BOX_HALF_WIDTH_ADD
+INTRO_BANNER_DRAW_OBJ_JUMP_VEL_X_LIMIT = $05
+use 03:BE70 INTRO_BANNER_DRAW_OBJ_JUMP_VEL_X_LIMIT
+INTRO_BANNER_DRAW_OBJ_X_ADD = $40
+use 03:BE78 INTRO_BANNER_DRAW_OBJ_X_ADD
+RUN_PPU_QUEUE_PPU_CTRL_SHADOW_MASK = $18
+use 08:800F RUN_PPU_QUEUE_PPU_CTRL_SHADOW_MASK
+RUN_CPU_AI_TOURNAMENT_FLAGS_LIMIT = $04
+use 0A:801D RUN_CPU_AI_TOURNAMENT_FLAGS_LIMIT
+AI_COND_DON_OBJ_STEP_LIMIT = $05
+use 0A:8516 AI_COND_DON_OBJ_STEP_LIMIT
+AI_COND_DON_AI_COND_ARG_LIMIT_A = $03
+use 0A:8524 AI_COND_DON_AI_COND_ARG_LIMIT_A
+AI_COND_DON_AI_COND_ARG_LIMIT_B = $02
+use 0A:852E AI_COND_DON_AI_COND_ARG_LIMIT_B
+AI_COND_SUB0_OBJ_STEP_LIMIT = $04
+use 0A:8721 AI_COND_SUB0_OBJ_STEP_LIMIT
+AI_COND_WALK_GAP_OBJ_PHASE_LIMIT = $05
+use 0A:87F3 AI_COND_WALK_GAP_OBJ_PHASE_LIMIT
+AI_COND_DOWN_ATTACK_AI_COND_ARG_LIMIT = $04
+use 0A:8937 AI_COND_DOWN_ATTACK_AI_COND_ARG_LIMIT
+AI_COND_WALK_CLOSE_OBJ_PHASE_LIMIT = $05
+use 0A:8A79 AI_COND_WALK_CLOSE_OBJ_PHASE_LIMIT
+AI_MIKE_CLOSE_OBJ_STEP_LIMIT = $03
+use 0A:93EF AI_MIKE_CLOSE_OBJ_STEP_LIMIT
+AI_MIKE_FAR_AI_RANGE_LIMIT = $04
+use 0A:950D AI_MIKE_FAR_AI_RANGE_LIMIT
+AI_CASEY_MID_FIGHTER_MOVE_ID_LIMIT = $0D
+use 0A:97EB AI_CASEY_MID_FIGHTER_MOVE_ID_LIMIT
+AI_DECIDE_SHREDDER_FIGHTER_MOVE_ID_LIMIT = $0D
+use 0A:99DB AI_DECIDE_SHREDDER_FIGHTER_MOVE_ID_LIMIT
+AI_SHREDDER_MID_AI_RANGE_LIMIT = $08
+use 0A:9B70 AI_SHREDDER_MID_AI_RANGE_LIMIT
+AI_REACT_COMMON_FIGHTER_MOVE_ID_LIMIT = $0D
+use 0A:9C01 AI_REACT_COMMON_FIGHTER_MOVE_ID_LIMIT
+AI_REACT_VS_LEO_OBJ_STEP_LIMIT = $02
+use 0A:9C4A AI_REACT_VS_LEO_OBJ_STEP_LIMIT
+AI_REACT_VS_RAPH_AI_PAD_LIMIT = $36
+use 0A:9CA2 AI_REACT_VS_RAPH_AI_PAD_LIMIT
+AI_CASEY_VS_LEO_SPECIAL_STAGE_LIMIT = $02
+use 0A:9E13 AI_CASEY_VS_LEO_SPECIAL_STAGE_LIMIT
+AI_REACT_SHREDDER_FIGHTER_MOVE_ID_LIMIT = $0D
+use 0A:9FC6 AI_REACT_SHREDDER_FIGHTER_MOVE_ID_LIMIT
+AI_SHREDDER_VS_MIKE_OBJ_STEP_LIMIT = $02
+use 0B:A0EF AI_SHREDDER_VS_MIKE_OBJ_STEP_LIMIT
+SHOW_TIMER_SETTING_TIMER_SETTING_ADD = $3F
+use 0C:80AA SHOW_TIMER_SETTING_TIMER_SETTING_ADD
+END_ROW_NEXT_SLOT_DAT_0_C_85_BE_LIMIT = $FE
+use 0C:84EF END_ROW_NEXT_SLOT_DAT_0_C_85_BE_LIMIT
+DRAW_SCREEN_COUNTER_TILE_SCREEN_COUNTER_ADD = $81
+use 0C:865C DRAW_SCREEN_COUNTER_TILE_SCREEN_COUNTER_ADD
+CONTINUE_TICK_OBJ_TIMER_MASK = $7F
+use 0C:868F CONTINUE_TICK_OBJ_TIMER_MASK
+FIGHT_END_BONUS_START_TIMER_SETTING_LIMIT = $03
+use 0C:8AB6 FIGHT_END_BONUS_START_TIMER_SETTING_LIMIT
+DRAW_NEXT_PROMPT_TEXT_DASH_DIR_ADD = $15
+use 0C:8B42 DRAW_NEXT_PROMPT_TEXT_DASH_DIR_ADD
+FIGHT_END_BONUS_DRAW_FIGHTER_HP_SUB = $02
+use 0C:8B8A FIGHT_END_BONUS_DRAW_FIGHTER_HP_SUB
+NAME_ENTRY_NEXT_PLAYER_NAME_ENTRY_CURSOR_ADD = $82
+use 0C:8CE6 NAME_ENTRY_NEXT_PLAYER_NAME_ENTRY_CURSOR_ADD
+NAME_ENTRY_LETTER_INPUT_TOURNAMENT_FLAGS_FLIP = $80
+use 0C:8D2C NAME_ENTRY_LETTER_INPUT_TOURNAMENT_FLAGS_FLIP
+NAME_ENTRY_CLEAR_SLOT_DAT_0_C_9090_LIMIT = $FE
+use 0C:8D65 NAME_ENTRY_CLEAR_SLOT_DAT_0_C_9090_LIMIT
+NAME_ENTRY_LETTER_MOVE_NAME_ENTRY_VAR2_LIMIT = $2D
+use 0C:8E74 NAME_ENTRY_LETTER_MOVE_NAME_ENTRY_VAR2_LIMIT
+NAME_ENTRY_LETTER_MOVE_NAME_ENTRY_VAR1_LIMIT = $04
+use 0C:8E9F NAME_ENTRY_LETTER_MOVE_NAME_ENTRY_VAR1_LIMIT
+NAME_ENTRY_DRAW_LETTER_NAME_ENTRY_VAR1_ADD = $A8
+use 0C:8EB5 NAME_ENTRY_DRAW_LETTER_NAME_ENTRY_VAR1_ADD
+NAME_ENTRY_DRAW_LETTER_NAME_ENTRY_VAR2_LIMIT = $2D
+use 0C:8EC0 NAME_ENTRY_DRAW_LETTER_NAME_ENTRY_VAR2_LIMIT
+NAME_ENTRY_NEXT_SLOT_NAME_ENTRY_CURSOR_LIMIT = $04
+use 0C:8FF3 NAME_ENTRY_NEXT_SLOT_NAME_ENTRY_CURSOR_LIMIT
+SET_RANKING_PALETTE_TOURNAMENT_CHAR_ADD = $0D
+use 0C:905F SET_RANKING_PALETTE_TOURNAMENT_CHAR_ADD
+INTRO_SHREDDER_LETTER_BOX_OBJ_PHASE_LIMIT = $06
+use 0C:9192 INTRO_SHREDDER_LETTER_BOX_OBJ_PHASE_LIMIT
+INTRO_PARADE_SCROLL_Y_SCROLL_Y_LIMIT_A = $7D
+use 0C:9252 INTRO_PARADE_SCROLL_Y_SCROLL_Y_LIMIT_A
+INTRO_PARADE_SCROLL_Y_SCROLL_Y_LIMIT_B = $7D
+use 0C:9262 INTRO_PARADE_SCROLL_Y_SCROLL_Y_LIMIT_B
+INTRO_PARADE_PART1_SCROLL_Y_MASK = $FC
+use 0C:9288 INTRO_PARADE_PART1_SCROLL_Y_MASK
+INTRO_PARADE_BLOCKS_INIT_MODE_STEP_SUB = $0B
+use 0C:931A INTRO_PARADE_BLOCKS_INIT_MODE_STEP_SUB
+INTRO_PARADE_BLOCKS_END_MODE_STEP_LIMIT = $10
+use 0C:9399 INTRO_PARADE_BLOCKS_END_MODE_STEP_LIMIT
+ENDING_FIGHTER_WAVE_ANIM_OBJ_FRAME_LIMIT = $2F
+use 0C:97FE ENDING_FIGHTER_WAVE_ANIM_OBJ_FRAME_LIMIT
+SCROLL_TEXT_UP_OBJ_JUMP_VEL_X_ADD = $30
+use 0C:98E5 SCROLL_TEXT_UP_OBJ_JUMP_VEL_X_ADD
+RANKING_ANIMATE_OBJ_FRAME_LIMIT = $36
+use 0D:A090 RANKING_ANIMATE_OBJ_FRAME_LIMIT
+STORY_CARD_TEXT_DAT_0_D_A343_LIMIT = $FE
+use 0D:A12A STORY_CARD_TEXT_DAT_0_D_A343_LIMIT
+PLAYER_SPRITE_SEQ_DAT_0_D_A22_A_LIMIT = $FE
+use 0D:A172 PLAYER_SPRITE_SEQ_DAT_0_D_A22_A_LIMIT
+WAIT_START_OR_TIMER_TOURNAMENT_MATCH_ADD = $03
+use 0D:A38C WAIT_START_OR_TIMER_TOURNAMENT_MATCH_ADD
+WAIT_START_OR_TIMER_TOURNAMENT_FLAGS_MASK_A = $03
+use 0D:A3B1 WAIT_START_OR_TIMER_TOURNAMENT_FLAGS_MASK_A
+WAIT_START_OR_TIMER_TOURNAMENT_FLAGS_MASK_B = $03
+use 0D:A3C4 WAIT_START_OR_TIMER_TOURNAMENT_FLAGS_MASK_B
+CONTINUE_MENU_CURSOR_OBJ_TIMER_MASK = $08
+use 0D:A4D9 CONTINUE_MENU_CURSOR_OBJ_TIMER_MASK
+PALETTE_FADE_TICK_FADE_STEP_LIMIT = $05
+use D44E PALETTE_FADE_TICK_FADE_STEP_LIMIT
+FADE_TO_WHITE_PALETTE_LIMIT = $30
+use D49E FADE_TO_WHITE_PALETTE_LIMIT
+FADE_TO_WHITE_FADE_STEP_LIMIT = $05
+use D4C3 FADE_TO_WHITE_FADE_STEP_LIMIT
+FADE_FROM_WHITE_PALETTE_SAVED_BITS = $30
+use D4F8 FADE_FROM_WHITE_PALETTE_SAVED_BITS
+FADE_FROM_WHITE_FADE_STEP_LIMIT = $06
+use D529 FADE_FROM_WHITE_FADE_STEP_LIMIT
+DRAW_OBJECTS_OAM_CYCLE_ADD = $34
+use D729 DRAW_OBJECTS_OAM_CYCLE_ADD
+SET_FLICKER_ATTR_FIGHT_FRAMES_MASK = $03
+use DCFC SET_FLICKER_ATTR_FIGHT_FRAMES_MASK
+SET_FLIP_FROM_REL_POS_OBJ_FLIP_MASK = $7F
+use DD4D SET_FLIP_FROM_REL_POS_OBJ_FLIP_MASK
+ADVANCE_SCORE_LOW_ONES_SUB = $0A
+use E16C ADVANCE_SCORE_LOW_ONES_SUB
+ADVANCE_SCORE_LOW_TENS_SUB = $0A
+use E17A ADVANCE_SCORE_LOW_TENS_SUB
+FIGHT_VS_SCREEN_PLAYER_NAME_BUF_MASK = $7F
+use E296 FIGHT_VS_SCREEN_PLAYER_NAME_BUF_MASK
+FIGHT_STAGE_INTRO_SCROLL_FLOOR_SCROLL_TABLE_MASK_A = $F8
+use E349 FIGHT_STAGE_INTRO_SCROLL_FLOOR_SCROLL_TABLE_MASK_A
+FIGHT_STAGE_INTRO_SCROLL_FLOOR_SCROLL_TABLE_SUB = $08
+use E350 FIGHT_STAGE_INTRO_SCROLL_FLOOR_SCROLL_TABLE_SUB
+FIGHT_STAGE_INTRO_SCROLL_FLOOR_SCROLL_TABLE_ADD = $08
+use E362 FIGHT_STAGE_INTRO_SCROLL_FLOOR_SCROLL_TABLE_ADD
+FIGHT_STAGE_INTRO_SCROLL_FLOOR_SCROLL_TABLE_MASK_B = $F8
+use E37F FIGHT_STAGE_INTRO_SCROLL_FLOOR_SCROLL_TABLE_MASK_B
+SET_BANNER_XFROM_FLOOR_FLOOR_SCROLL_TABLE_SUB = $4F
+use E386 SET_BANNER_XFROM_FLOOR_FLOOR_SCROLL_TABLE_SUB
+STAGE_BANNER_END_STORY_STAGE_LIMIT = $06
+use E3AD STAGE_BANNER_END_STORY_STAGE_LIMIT
+FIGHT_ROUND_RUNNING_TIMER_SETTING_LIMIT = $03
+use E4AB FIGHT_ROUND_RUNNING_TIMER_SETTING_LIMIT
+FIGHT_KO_PAUSE_ROUND_COUNTER_LIMIT = $03
+use E592 FIGHT_KO_PAUSE_ROUND_COUNTER_LIMIT
+MATCH_OVER_BY_GAME_TYPE_STORY_STAGE_LIMIT = $04
+use E5EA MATCH_OVER_BY_GAME_TYPE_STORY_STAGE_LIMIT
+STORY_MATCH_LOST_CHECK_STORY_STAGE_LIMIT = $07
+use E5FA STORY_MATCH_LOST_CHECK_STORY_STAGE_LIMIT
+STORY_MATCH_LOST_STORY_STAGE_LIMIT = $06
+use E683 STORY_MATCH_LOST_STORY_STAGE_LIMIT
+FIGHT_WIN_POSE_SETUP_LAST_ATTACKER_LIMIT = $02
+use E6F3 FIGHT_WIN_POSE_SETUP_LAST_ATTACKER_LIMIT
+FIGHT_WIN_POSE_RUN_LAST_ATTACKER_LIMIT = $02
+use E702 FIGHT_WIN_POSE_RUN_LAST_ATTACKER_LIMIT
+FIGHT_FRAME_CLEAR_MODE_SUB_STATE_LIMIT_A = $08
+use E9AD FIGHT_FRAME_CLEAR_MODE_SUB_STATE_LIMIT_A
+FIGHT_FRAME_CLEAR_CAMERA_X_LIMIT_A = $C0
+use E9CB FIGHT_FRAME_CLEAR_CAMERA_X_LIMIT_A
+FIGHT_FRAME_CLEAR_CAMERA_X_LIMIT_B = $08
+use E9E4 FIGHT_FRAME_CLEAR_CAMERA_X_LIMIT_B
+FIGHT_FRAME_CLEAR_MODE_SUB_STATE_LIMIT_B = $05
+use EA1B FIGHT_FRAME_CLEAR_MODE_SUB_STATE_LIMIT_B
+UPDATE_HUD_TIMER_SETTING_LIMIT = $03
+use EAA4 UPDATE_HUD_TIMER_SETTING_LIMIT
+UPDATE_HUD_TIMER_TENS_LIMIT = $02
+use EAD6 UPDATE_HUD_TIMER_TENS_LIMIT
+DRAW_TIMER_DIGIT_LOOP_TIMER_TENS_LIMIT = $0A
+use EB1D DRAW_TIMER_DIGIT_LOOP_TIMER_TENS_LIMIT
+DRAW_ROUND_WINS_DAT_EB6_E_LIMIT = $FE
+use EB54 DRAW_ROUND_WINS_DAT_EB6_E_LIMIT
+AI_TARGET_ATTACKS_ME_AI_TARGET_STATE_LIMIT = $08
+use ED5F AI_TARGET_ATTACKS_ME_AI_TARGET_STATE_LIMIT
+BALL_HELD_BY_BALL_OWNER_MASK = $C0
+use EE01 BALL_HELD_BY_BALL_OWNER_MASK
+TITLE_MENU_CURSOR_BLINK_MODE_TIMER_MASK = $08
+use F463 TITLE_MENU_CURSOR_BLINK_MODE_TIMER_MASK
+MAP_SOUND_BANK_BANK_ID_AT8000_BITS = $30
+use F670 MAP_SOUND_BANK_BANK_ID_AT8000_BITS
+BUILD_FLOOR_SCROLL_TABLE_CAMERA_X_SUB = $60
+use FCD0 BUILD_FLOOR_SCROLL_TABLE_CAMERA_X_SUB
+FIGHT_FRAME_TAIL_DIV_COUNT_SUB = $04
+use FD32 FIGHT_FRAME_TAIL_DIV_COUNT_SUB
+
+; AbsDeltaBelow limits: carry clear = |tmpDeltaHi:tmpDeltaLo| < A. Names say what the caller does when the gap is under the limit
+; (read from the code, samples in docs/ai.md). DY = ObjDeltaY16 (target objY - own objY), DX = aiBallDx.
+AI_BALL_DX_LT_06 = $06
+use 0A:8ACF AI_BALL_DX_LT_06
+AI_SPECIAL_B_DY_LT_20 = $20
+use 0A:939F 0A:9D87 AI_SPECIAL_B_DY_LT_20
+AI_SPECIAL_B_DY_LT_30 = $30
+use 0A:903E 0A:91DF 0A:9253 AI_SPECIAL_B_DY_LT_30
+AI_SPECIAL_B_DY_LT_70 = $70
+use 0A:8FB3 AI_SPECIAL_B_DY_LT_70
+AI_GET_BALL_DX_LT_30 = $30
+use 0A:9489 AI_GET_BALL_DX_LT_30
+AI_GET_BALL_DX_LT_40 = $40
+use 0A:999A AI_GET_BALL_DX_LT_40
+AI_PRESS_A_DY_LT_40 = $40
+use 0A:96FE AI_PRESS_A_DY_LT_40
+AI_PRESS_A_DY_LT_50 = $50
+use 0A:9612 0A:96AB AI_PRESS_A_DY_LT_50
+; second Casey check: Y still holds the first limit ($50) from AbsDeltaBelow, so ObjDeltaY16 reads objVelY[0] - objY,X (see docs/ai.md)
+AI_PRESS_A_GAP2_LT_30 = $30
+use 0A:961C 0A:96B5 AI_PRESS_A_GAP2_LT_30
+use 03:ABBA ATK_HOTHEAD_FIRE
+use 03:ABC0 ATK_SHREDDER_BOLT
+use 03:ABC4 ATK_CASEY_RAIN
+use 02:9A69 02:9A75 02:9C0F 0C:8DC7 BTN_A
+use 02:9C6A 02:9C86 02:9D78 0C:8DCC 0C:8F78 BTN_B
+use 02:9B49 02:9D6B BTN_A|BTN_B
+use D336 F402 BTN_UP
+use 0C:8D25 0C:8DD1 0C:8F7D BTN_UP|BTN_DOWN|BTN_LEFT|BTN_RIGHT
+SNDP_DOUBLE = $01 ; sndPacked bit 0: double length
+SNDP_PACKED = $10 ; sndPacked bit 4: packed note length mode
+SNDP_ARMED = $80 ; sndPacked bit 7: SC_PACKED / SC_PACKED2 is switched on (the same command again switches it off); kept across notes with SNDP_DOUBLE
+use 00:849C 00:84BB SNDP_PACKED
+use 00:84C0 SNDP_DOUBLE
+use 00:84B6 00:84F3 SNDP_DOUBLE|SNDP_ARMED
+
+; objSpriteSet of an attack object compared with the special-move ids (TurtlePowerSlot, SpawnHitSpark, CheckHits, AttackObjHitCheck, SpawnOpponentSpark)
+use 03:A842 ATK_LEO_SPIN
+use 03:ACF5 ATK_SHREDDER_WAVE
+use 03:AAF5 ATK_DON_2
+use 03:BCE8 ATK_HOTHEAD_FIRE
+use 03:BD3E ATK_RAPH_ROLL
+
+; ContinueScreenRun phases (objPhase of object 0 on the CONTINUE screen, the jump table order)
+CONT_COUNTDOWN = 1
+CONT_TICK = 2
+CONT_INPUT = 3
+CONT_FINAL_COUNT = 4
+use 0C:86F7 CONT_COUNTDOWN
+use 0C:866A CONT_TICK
+use 0C:861C CONT_INPUT
+use 0C:86CC CONT_FINAL_COUNT
+use 02:84B2 BALL_HELD
+
+; small upward hop (objVelY -5, whole part): KnockdownStart, HurtBall for CHAR_CASEY (the others get -2), RaphSpecialHit
+HOP_VEL_Y = $FB
+use 02:83E5 02:8E5C 03:B54F HOP_VEL_Y

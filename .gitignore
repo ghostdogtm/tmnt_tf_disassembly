@@ -1,0 +1,20 @@
+# ROMs and build output (the original ROM is never committed)
+*.nes
+*.o
+*.map
+game_labels.txt
+game.mlb
+config_reloc.cfg
+header.bin
+src/chr/
+gfx/*.png
+tmp/
+__pycache__/
+# the user's Mesen folder (settings, saves)
+/mesen/
+# local tool state
+.claude/
+*.pyc
+game.mlb
+# game screenshots
+docs/arenas/

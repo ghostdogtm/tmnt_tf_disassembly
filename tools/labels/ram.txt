@@ -1,0 +1,307 @@
+; ADDR  NAME  [SIZE]  ; comment            (hex addresses; SIZE>1 makes ADDR+n print as NAME+n)
+0020 gameMode ; main game mode (GameMode enum in const.txt), dispatched by RunGameMode
+0021 modeStep ; step inside the current game mode; SetGameMode / NextGameMode clear it
+0022 frameCounter ; incremented every NMI by GameFrame
+0023 nmiBusy ; non-zero while the NMI logic runs: a late NMI only updates the PPU and sound
+0024 leftColumnTimer ; frames left with the left 8 pixels hidden (PPUMASK & $E7)
+0025 ppuQueueLen ; bytes used in ppuQueue
+0028 rngSeed
+002E soundBankBusy ; 1 while the sound pair is mapped (PlaySound/UpdateSound must not nest)
+002C gameType ; mode chosen on the title menu (GameType enum)
+002F oamCycle ; OAM start offset, advanced every frame by DrawObjects (sprite flicker rotation)
+0030 screenTask ; non-zero: RunGameMode skips the game mode and runs a screen task instead; bit 7 = LoadPaletteSetFade, bit 6 = FadeToWhiteRun (fade to white), bit 5 = FadeFromWhiteRun (from white), other = SavePaletteStart (from black)
+0032 chrBanks 6 ; CHR bank numbers for MMC3 R0-R5
+003D bankStackTop ; index of the top entry of bankStack
+003E bankStack 4 ; $30|pair values (first entry at +1)
+0042 mmc3SelectShadow ; last value written to MMC3_BANK_SELECT by MapBankPairA
+0043 mmc3SelectShadow2 ; same, by MapBankPairX and SetIrqForFrame (Mesen: only $00, $06, $07 seen)
+0046 bankBeforeSound ; $30|pair mapped before MapSoundBank
+0048 irqSplitId ; argument of SetIrqSplit
+0049 irqSplitOn ; IRQ split active flag (values 0 and 1 only in 193 Mesen runs)
+008C rngMix ; random number: stirred by StirRandom in the main loop
+008E joyPressed 2 ; buttons pressed this frame, pad 1 / pad 2
+0090 joyPressedAny ; joyPressed | joyPressed+1
+0091 joyHeld 2 ; buttons held, pad 1 / pad 2
+0093 joyHeldAny ; joyHeld | joyHeld+1
+0094 modeState ; state inside ModeGame (gameMode 04): 0 start, 1 set fighters, 2 start match, 3 VS setup, 4 fight (JumpTable in ModeGame)
+0095 modeSubState ; sub-state of the current modeState: dispatched by FightSubState during a fight, also used by the select / option screens
+009C modeTimer 2 ; 16-bit frame countdown: SetModeTimer, CountModeTimer
+009E storyStage ; Story: stage counter (1 in the first fight)
+00A2 fighterChar 2 ; characters chosen for P1 / P2 (CHAR_*), copied to objSpriteSet at the round start
+00A8 thisFighter ; slot (0/1) of the fighter being updated by UpdateFighters
+00A9 otherFighter ; thisFighter ^ 1: the opponent
+00AE score 8 ; P1 $AE-$B1, P2 $B2-$B5: four decimal digits each, one per byte, most significant first (checked in Mesen: grows by 1-9 per hit)
+00AD fighterLoop ; loop counter of UpdateFighters (1, 0)
+00B6 storyTextId ; RunStoryText: STXT_*
+00F8 joyPressedCopy 2 ; copy of joyPressed made by UpdateJoypadState and cleared by ClearJoyPressed; nothing reads it
+00FA joyPrevious 2 ; held buttons of the last frame
+00FC scrollY
+00FD scrollX
+00FE ppuMaskShadow
+00FF ppuCtrlShadow
+0129 chargeTime 2 ; CharChargeTime of each fighter, ScaleTime-adjusted at the round start
+0122 saveSignature 3 ; = SaveSignature after the first power on: $0113-$0127 survive a reset
+0125 difficulty ; option DIFFICULTY: 0 easy, 1 normal, 2 hard; set to 1 on the first power on
+0126 gameSpeed ; option SPEED: 0 normal, 1 turbo (shorter jumps, faster moves)
+0127 timerSetting ; option TIMER 0-3 (TIMER_SETTINGS = 4): 0-2 pick the round time from RoundTimerStart (45, 60, 99), 3 = no time limit (HUD, FightRoundRunning, StopIfTimeUp skip the timer); ignored when gameType = 0 (always 60), sprite frame $3F + value on the option screen; default 1 (set with the other defaults at F1CE when the save signature is wrong)
+0300 ppuQueue 256 ; PPU update records (PPUQ_* in const.txt), written by PpuQueuePush, run by RunPpuQueue in the NMI
+0400 objFrame 16 ; object slots 0-15 (slots 0/1 = the fighters): metasprite id; 0 = free slot; bit 7: frame from the sprite set of objSpriteSet
+0410 objY 16 ; Y position (screen pixels, the floor is $B0)
+0420 objYFrac 16 ; Y fraction
+0430 objXHi 16 ; X high byte: not 0 = off screen, not drawn
+0440 objX 16 ; X position
+0450 objXFrac 16 ; X fraction
+0460 objVelY 16 ; Y speed, signed (+ = down), added by MoveObjY
+0470 objVelYFrac 16
+0480 objVelX 16 ; X speed, signed, added by MoveObjX
+0490 objVelXFrac 16
+04A0 objJumpVelX 16 ; (Mesen: $00-$FE, signed speed) fighters: X speed kept for the whole jump (copied to objVelX every frame)
+04B0 objParam 16 ; general per-object byte, not a speed (the old name was wrong): fighters use it as a move parameter / counter (hurt jump and ball tables, special-attack counters, 0 = cleared when a hold is cut off), the intro fight as the step, and the menu / parade / ending / continue screens (slot 0) as option row, scroll step, parade index, countdown (optionRow alias); KoWinTimerStep halves it
+04C0 objHitType 16 ; (Mesen: only 0-3, 5, 7 seen) fighters in FST_HURT: kind of hit reaction (jump table in FighterHurt); in Leo's spin special it is the fraction byte of the saved X speed (objParam = the whole byte; LeoSpinAccel)
+0500 objAttr 16 ; bit 7 (OBJATTR_OVERRIDE) = replace palette + priority of every metasprite entry with objAttr & $23 (DrawMetasprite)
+0510 objFlip 16 ; bits 7/6: OAM vertical / horizontal flip of the metasprite
+0520 objState 16 ; fighters in PHASE_FIGHT: action state (FST_*); in PHASE_KO: step of the knock-out sequence
+0530 objPhase 16 ; fighters: PHASE_* (spawn, intro, fight, knocked out); other objects: their own state
+0540 objStep 16 ; step inside objState (most state handlers dispatch on it)
+0550 objSpriteSet 16 ; sprite set; for the fighters the character (CHAR_* in const.txt): table at SpriteSetPtrs
+0560 objTimer 16 ; frame countdown used by the state handlers; 1 per frame (Mesen, 16 000-frame bot run: loads of $08 $09 $10 $1C $2C $30 $4A $80 $96 reached 0 after exactly that many frames)
+0570 objBox 16 ; collision box id (BoxHalfWidth / BoxHalfHeight); 0 = none. Fighters: SetFighterBox, attack objects: AttackBox
+0580 objStatus 16 ; (Mesen: only $00 and $80) fighters: bit 7 set while airborne, knocked down or held (cannot be grabbed)
+0590 fighterHp 2 ; P1 / P2 health, $B0 = full
+05B0 objPower 16 ; attack objects: damage of the hit (AttackPower + TurtlePowerAdd), subtracted from fighterHp (03:BD0A)
+05C0 objAnimTimer 16 ; frames left on the current animation frame
+05D0 objAnimIndex 16 ; index of the current animation frame
+05F0 objHitDelay 16 ; fighters: counts down every frame (UpdateFighters); while non-zero the fighter takes no new hit, starts no hold and runs no hit check (CheckHits, FightFrame). Loaded with $20 by a hit (HitReactionCommon, AddPendingDamage), $14 by HurtStand, 4 by SetHurtDelay and the held anim, 1 for the loser of a trade (CheckHits)
+0602 fadeStep ; palette fade: 0 = not started
+0603 fadeTimer ; frames between fade steps
+0600 fighterHasBall 2 ; bit 7 (slot 1 only ever 00/80 in the logs): the fighter holds the ball (set at 02:84BE after NearBall; the ranking screen also writes slot 0, 0C:8DF7, so values 00-$17 occur there)
+0604 fighterCmdStep 2 ; progress of the ball command (ReadBallInput): 0 idle, 1 after Down was seen (BallCommandCheck) (also scratch of the palette fade code: FadeFromWhiteRun, SavePaletteStart, PaletteFadeTick)
+0606 fighterCmdTimer 2 ; frames left to enter the next part of the ball command (reloaded to $14 by SetCmdTimer20, counted down by BallCommandCheck)
+0608 specialStage 2 ; stage of the character's special-move command (ReadSpecialInput)
+060A special2Stage 2 ; stage of the second command run in parallel (Shredder: forward-down-B, or B taps counted)
+060C specialTimer 2 ; frames left for the next stage of the command, or the charge time counted
+060E special2Timer 2 ; frames left for the next stage of the second command ($14; B taps: $10)
+0631 specialBits 2 ; directions / button collected in the current stage (forward bit, $80 = button)
+0633 special2Bits 2 ; directions / button collected for the second command ($40 = B)
+0641 specialCharge 2 ; charge frames when the command went on (RaphSpecial: longer roll)
+0610 fighterAttacking 2 ; $80 while an attack is running (cleared on landing / when grabbed); read by the CPU AI
+0612 fighterMoveId 2 ; attack being performed: index into the move pointer table MovePtrs
+0614 fighterMoveTimer 2 ; frames left on the current move script pair (shorter by 1/4 at gameSpeed > 0)
+0616 fighterMoveStep 2 ; index into the move data
+0618 fighterIdleAnim 2 ; idle (standing) animation index
+061A fighterIdleTimer 2 ; frames left on the idle animation frame
+061C fighterHeldDir 2 ; value from HeldDirByPad for the left/right buttons held
+0647 hpBarShown 2 ; health shown in the bars, follows fighterHp
+064D palette 32 ; palette buffer (BG + sprites); PaletteUploadRun pushes it to PPU $3F00 through the PPU queue when paletteUploadFlag is set
+0649 roundsWon 2 ; rounds won in the match, P1 / P2 (2 = match won)
+0672 timerTens ; round timer, tens digit (starts at 6)
+0673 timerOnes ; round timer, ones digit
+06DE aiTarget 2 ; slot the AI reacts to: AiInit sets it to the other fighter (X EOR 1); values 0/1 only
+0638 fighterGap ; horizontal gap between the two fighters' boxes (distance - both BoxHalfWidth; 0 if they overlap), UpdateFighterGap
+; CPU AI (bank 0A, docs/ai.md). Per-fighter pairs are indexed by the fighter slot X; aiTargetDx / aiBallDx are shared
+; scratch (recomputed for the fighter being run)
+05A6 ballOwner ; bit 6: fighter (bit 0) holds the ball, bit 7: fighter (bit 0) shot it; 0 = nobody
+0624 dashDir 2 ; left/right bit of the first tap of a double-tap dash (ReadDashInput 03:BA96)
+0626 dashStage 2 ; double-tap dash: 1 = first tap seen, 2 = dashing (the run animation is picked by it)
+0628 dashTimer 2 ; frames left for the second tap ($1E)
+0680 aiScriptBuf 32 ; CPU fighter 0: the running action script, translated (AiStartAction); $069F is set to $FF
+06A0 aiScriptBuf2 32 ; CPU fighter 1: same; $06BF is set to $FF
+06C0 aiAction 2 ; action to start next frame (0 = keep running the buffer, $FF = none: choose a new one)
+06C2 aiScriptPos 2 ; read position in aiScriptBuf
+06C4 aiHoldTimer 2 ; frames left to keep the pad as it is (AI_STEP_HOLD)
+06C6 aiPad 2 ; pad bits the AI held last frame
+06C8 aiPadKeep 2 ; pad bits kept held under the next script bytes
+06CA aiMode 2 ; 0 = init (AiInit), 1 = choose an action, 2 = run it
+06CC aiPadTimer 2 ; frames left for AI_STEP_TIMED (then the pad is released)
+06CE aiSituation 2 ; hash of the situation last seen while running: a change lets AiReact interrupt
+06D2 aiStep 2 ; AI_STEP_*: what AiStepScript does this frame
+06D4 aiCond 2 ; AIC_* condition waited for in AI_STEP_WAIT
+06D6 aiTargetDx 2 ; target X - own X, big endian (hi, lo): bit 7 of the first byte = target is to the left
+06D8 aiBallDx 2 ; ball (slot 6) X - own X (ObjDeltaX16), big endian (hi, lo); set by GetBallRange, read by the AI conditions
+06DA aiCondArg 2 ; argument / counter of the current condition
+06DC aiTapCount 2 ; AI_TAP_B presses done (while non-zero the executor runs every frame)
+06E0 aiCondTimer 2 ; frames left before some conditions give up ($C0 on reset)
+06E2 aiLastAction 2 ; last action started (read by the character decision routines)
+06E4 aiInterrupted 2 ; set when AiDecide has interrupted the running action: no more interruptions until AiResetState
+06E6 aiLocked 2 ; non-zero (AI_LOCK): the action may not be interrupted and AiResetState does nothing
+06E8 aiRanges 8 ; 4 per fighter (AiInit): dat_DF1C - 1, then AiRangeTable; +0..+2 = fighterGap limits of range classes 1-3, the entry of the current class goes to $0C
+06F0 aiNoInterrupt ; $FF before AiDecide in the run mode; AiResetState clears it, and only then the decided action replaces the running one
+06F1 aiGapSeen 2 ; fighterGap when AiStepScript last ran
+06F3 aiShotSeen ; AiNoticeShot rolled for the current ball shot
+06F4 aiFlagF4 2 ; per fighter: only ever cleared (AiInit, AiResetState); no code reads it
+06F6 aiCondCount 2 ; AICS_1 hold counter (AiCondHoldTimes)
+06F8 aiShotRange ; range class of the target's flying shot (ATK_SHREDDER_WAVE / ATK_CASEY_RAIN), $FF = none
+06FA aiCondCount2 2 ; AICS_8 counter
+0097 gamePaused ; non-zero while a fight is paused (Start; SND_PAUSE plays, the sound driver runs only that SFX)
+; ---- sound driver (bank 00, docs/sound.md). Channel arrays are indexed by X = SNDCH_*: 0 SQ1, 1 SQ2, 2 TRI,
+; 3 drums (music on the noise channel), 4 SFX on SQ1, 5 SFX on noise
+00E0 sndStream 2 ; stream pointer of the channel being read
+00E2 sndTemp 2 ; scratch: envelope pointer, counters, jump table target
+00E4 sndSaveX ; SoundStart / SndJumpTable keep X here (also a scratch byte)
+00E5 sndSaveY
+00E6 sndHeaderPtr 2 ; SFX header / song pointer entry being started
+00E8 sndPeriod 2 ; period being written (lo, hi)
+00EA sndChanFlags 6 ; SNDF_* bits: 0 SFX stream format, 1 resting, 2 first loop open, 3 second loop open, 4 inside SC_CALL, 6 slide block open (SC_SLIDE), 7 SNDF_FADE_IN: the volume ramps up to sndVolumeBase (set by ResetEnvTimersScaled, cleared when reached)
+0700 sndBaseLen 6 ; base length (frames per length unit): SC_LEN / SC_LENGTH / SFX header
+0706 sndTimer 6 ; frames left of the current note
+070C sndChanId 6 ; sound id playing on the channel, 0 = idle (a new SFX takes a channel only with an id >= this one)
+0712 sndPtrLo 6 ; stream position
+0718 sndPtrHi 6
+071E sndLoopLo 12 ; SC_LOOP start (first 6) and SC_LOOP2 start (last 6)
+072A sndLoopHi 12
+0736 sndLoopCount 12 ; SC_REPEAT counter for each loop level
+0742 sndReturnLo 6 ; return address of SC_CALL
+0748 sndReturnHi 6
+074E sndVolume ; current volume (envelope step); UpdateChannel lowers it once per sndFadeSteps count
+0750 sndDutyFlags ; SC_DUTY argument when its low nibble is not 0: bit 1 makes the volume register use its high nibble instead of sndDuty (WriteVolFlags)
+0754 sndDuty ; duty bits (high nibble of the second SC_LEN byte)
+0756 sndVolumeBase ; volume (low nibble of the second SC_LEN byte)
+0759 sndPeriodHiOut ; last period high byte written ($F8 = write the next one)
+075C sndNewId ; id SoundStart is starting
+075E sndPeriodLoOut ; last period low byte written
+0761 sndChannel ; channel X being updated
+0763 sndDetune ; SC_DETUNE: bit 7 = up, bits 0-6 = period offset
+0766 fadeOutSteps ; FadeOutMusic: steps left (UpdateFadeOut)
+0768 sndVibFlags ; bit 7 = vibrato on (SC_VIBRATO sets it, a 0 argument clears it)
+076B fadeOutVolume ; volume taken off every music channel
+076D sndVolOffset ; SC_VOLUME
+076F sndVolMin ; SC_FLAGS bits 7-6: lowest volume ChannelVolume allows (clamp branch never ran in the logs)
+0772 sndSweep ; sweep register value ($7F = off)
+0774 sndEchoFlags ; SC_FLAGS: bit 7 = echo on (EchoStore after each note), bit 5 = reset the echo buffer (EchoStore), bit 4 = note-length boundary mode (NoteLengthBoundary), bits 3-2 = non-zero: no volume decay before the release point, and at it the volume is set to this value (1-3) instead of fading (UpdateChannel), bits 0-1 = echo delay (EchoPeriodLoad)
+0777 sfxSkip ; SoundStart: count of header entries to skip; per channel in the slide command: SC_SLIDE step byte (bit 7 = add, bits 0-6 = amount)
+077A fadeOutSpeed ; frames per fade step
+077C sndTemp2 ; scratch: length multiplier, stream offset, SFX channel
+0781 sfxHeaderIdx ; SoundStart: SfxChannels index of the channel being started
+0786 sndByte ; scratch: SFX header channel bits, packed note byte (0 = read the stream)
+078B sfxHeaderMask ; SoundStart: channel bits left to start
+078D sndEchoIdx ; write index (0-3) of the channel's 4-entry echo ring in sndEchoLo/Hi (EchoStore)
+0790 sfxChannelMask ; channels taken by SFX
+0792 sndFadeTimer ; cleared by ResetEnvTimers and the channel init; never read
+0795 sndChanBit ; ChannelBit result: $80 >> channel
+0797 sndFade ; SC_FADE: high nibble = fade-in start volume, low nibble = timer reload (frames per step); cleared when the start volume is not below sndVolumeBase
+079A sndTemp3
+079F sfxHeader ; header byte of the SFX being started
+07A4 sndOctave ; SC_OCTAVE
+07A7 sndTranspose ; SC_TRANSPOSE: bit 7 = down
+07AA sndNotePeriodLo ; period of the current note (before vibrato / detune)
+07AD sndNotePeriodHi
+07B0 sndEnvTimer ; frames left of the envelope step
+07B2 sndRegOffset ; APU register offset of the channel (ChannelRegs)
+07B3 sndVibDelay ; frames until the next vibrato / pitch-envelope step (UpdateChannel counts it down; VibratoNext reloads it from the table's high nibble)
+07B6 sndEnvPos ; position in the volume envelope (vibrato: +3)
+07B8 sndChannelsLeft ; SoundStart / StartMusic loop counter
+07BC sndEnvLoop ; ENV_LOOP position
+07C2 sndEnvRepeat ; ENV_REPEAT counter
+07C4 sndPausedLast ; gamePaused as of the last frame
+07C8 sndVibId ; SC_VIBRATO: envelope id of the pitch steps
+07CB sndVibDepth ; second SC_VIBRATO byte: low nibble = depth multiplier (VibratoScaleDepth), high nibble = start delay in base lengths (StartVibrato)
+07CE sndVibOffsetLo ; pitch offset of the vibrato
+07D1 sndVibOffsetHi
+07D4 sndEnvId ; SC_ENV / third SC_LEN byte: bit 7 set = fade mode (volume decay by sndFade / sndRelease, no table; low nibble = sndFadeSteps), clear = EnvelopePtrs offset (EnvelopeNext)
+07D6 fadeOutTimer
+07D7 sndRelease ; SC_RELEASE: the note is cut after n/16 of its length (0 = never)
+07DA sndReleaseAt ; sndTimer value at which the note is cut
+07DD sndEchoLo 8 ; recent note periods (SQ1: 0-3, SQ2: 4-7)
+07E5 sndEchoHi 8
+07ED sndPacked ; SC_PACKED state: bit 4 = packed mode, bit 0 = double length, bit 7 = SC_PACKED / SC_PACKED2 armed (SNDP_ARMED; the byte & $81 is stored, the same command again clears it)
+07F1 musicSkipPeriod ; SC_DIVIDER: every n-th frame the music channels skip their update (slower tempo)
+07F2 musicSkipCount
+07F3 musicSkipNow ; 1 in a skipped frame
+07F4 sampleTimer ; frames left of the DPCM sample (PlaySample ignores new ones while it runs)
+0026 demoFlag ; nonzero in the attract-mode fight (ModeDemo sets 4): no CPU AI (RunCpuAi), no score HUD (DrawScores), no pause (PauseCheck), no round-win reset; cleared by the title and name-entry code
+0045 mirroringShadow ; value last written to MMC3_MIRRORING (0 vertical, 1 horizontal)
+004A irqLatch ; value last written to MMC3_IRQ_LATCH
+004B irqHandlerPtr 2 ; SetIrqSplit: routine the IRQ jumps to for the current split
+004D irqStep ; step of the current IRQ split (0 at the frame start)
+004E irqChrBanks 8 ; two sets (Y = 0 / 1) of the CHR banks R0-R3 the IRQ handler switches in, interleaved: R0 $4E/$4F, R1 $50/$51, R2 $52/$53, R3 $54/$55 (sub_F98F)
+010D lastScore 4 ; copy of the score digits taken by FightStoryAdvanceStage (E770); restored with savedStoryStage (0D:A4FB) when the game type changes
+0111 scoreLowOnes ; the two low decimal digits of the score (units): DrawScores appends scoreLowTens/Ones after the 4 score digits (Mesen: "200" = digit 2 + "00") and the ranking packs them as the last two digits; 0 at the title, +1 only in FightStoryAdvanceStage (P2 joins the Story, AdvanceScoreLow)
+0112 scoreLowTens
+0113 highScores 15 ; 5 entries x 3 bytes, best first: score as 4 packed BCD digits (2 bytes), stage counter (tens << 4 | ones); sub_0C_9F3A inserts a new score
+002A fightFrames ; incremented every frame of a fight (wraps)
+0086 shakeOffsetX ; screen shake offset from the table at FightFrameTailRts+1 indexed by shakeTimer: the scroll X of IrqShakeScroll, and added to the sprite Y of fighters standing at or below FLOOR_Y (0E:D76F)
+0630 shakeTimer ; frames of screen shake left (set to $20 by a hit); indexes the offset table at FE36
+0645 pendingDamage 2 ; per fighter: damage still to be taken off fighterHp, 1 per frame (UpdateFighters)
+062A comboTimer 2 ; per fighter: frames left of the combo window ($3C after a hit); at 0 comboDamage is cleared
+062C comboDamage 2 ; per fighter: damage accumulated inside the combo window (adds divDividend, $10 for Hothead fire; comboTimer reloaded to $3C); at ComboDamageLimit[objSpriteSet] the fighter is knocked down (SND_HIT_COMMON) and it clears
+0099 inputScriptDone ; (PlayInputScript has no caller) incremented when the input script reaches its $FF end
+009A inputScriptTimer ; (PlayInputScript has no caller) frames left of the current input script step
+009B inputScriptPos ; (PlayInputScript has no caller) index into the input script (duration, pad) pairs at 06:8037; 0 = off
+0038 chrBanksCopy 4 ; copy of chrBanks+2..+5 taken by SetChrBanks when it runs outside the NMI (never read back)
+003C setChrWasNmi ; nmiBusy as SetChrBanks saw it (never read back)
+00F0 sndFadeSteps 6 ; per channel: volume decrements left, set from the envelope id low nibble; UpdateChannel lowers sndVolume once per sndEnvTimer wrap
+000C hitSparkKind ; scratch: SpawnHitSpark kind (1/2); AI: range byte
+000E tmpDeltaLo ; scratch: LOW byte of a 16-bit distance (hit boxes, AI); written first by ObjDeltaX16/Y16 (Mesen: $0E holds the pixel difference, $0F the sign/high byte)
+000F tmpDeltaHi ; scratch: HIGH byte of a 16-bit distance (sign byte for AbsDeltaBelow)
+0018 divDividend 2 ; Divide16 (sub_D900): dividend lo, hi; also scratch in hit code
+001A divDivisor 2 ; Divide16 divisor lo, hi
+001C divRemainder 2 ; Divide16 running remainder lo, hi
+001E scaleTimeSaveY ; ScaleTime keeps Y here
+001F holdAnimSaveY ; StepHoldAnim keeps Y here
+0056 floorScrollTable 35 ; per-band scroll X for the IRQ split: BuildFloorScrollTable ramps it from $60 toward cameraX; also reused as a 2-byte scratch ($0056/$0057) by FightVsScreen and the stage intro
+0087 irqScrollX ; shakeOffsetX copy used as the scroll X of the IRQ split (IrqShakeScroll)
+0088 irqBandIdx ; IRQ handler: band counter (reset from irqStep in SetIrqForFrame)
+00A6 cameraX ; horizontal camera: advanced by cameraScroll every frame (FightFrameClear); IrqCameraSplit and BuildFloorScrollTable scroll from it; world X = objX + cameraX (BallClampX, BallWorldX); FightRoundSetup sets $60 (centre)
+00B7 rampSign ; BuildFloorScrollTable: 1 when cameraX < $60
+00B8 rampDist ; |cameraX - $60|
+00B9 rampStepHi ; ramp step per band (hi)
+00BA rampStepLo ; ramp step per band (lo)
+00BB rampPosHi ; running ramp value (hi)
+00BC rampPosLo ; running ramp value (lo)
+00BD rampTmp 3 ; scratch for the shifts that build the step
+0200 oamBuffer 256 ; sprite attribute memory, copied by OAM DMA in the NMI (DrawObjects fills it)
+04D0 objHurtTimer 16 ; fighters: frames left in the hurt reactions (HurtStand/HurtBlock/HurtBall count it down)
+04E0 objHurtPower 16 ; fighters: strength of the last hit taken (attacker objPower, $08 for a block); HurtStandPower picks the hurt timer from it
+04F0 objCounter 16 ; general purpose counter: KO pause, attack phase steps (INC in attack steps); compared between fighters as the tie-break when HP is equal (CheckHits)
+05E0 objFlag80 16 ; $80 is stored when an object starts (spawn / special attack objects); bit 7 = the object lives in world space: it is shifted by -cameraScroll every frame (03:BC33)
+0596 ballHp ; HP slot of the ball object (slot 6; fighterHp+6): written with its objPower at the ball launch (03:A02A, A081)
+05A0 fighterHpCopy 2 ; set equal to fighterHp by ClearObjX; never read by name
+061E hitFlags 2 ; per fighter flags of CheckHits: bit 7 = a hit/block connected (03:AB1C); value 1 = this fighter won the trade (HP compare, tie broken by objCounter)
+062F screenDelay ; frames of a menu/screen wait, counted down every 4th frame by SkipCallerWhileCountdown
+063C cameraScroll 2 ; camera scroll of this frame (063C int, signed; 063D frac), computed by FightFrameClear from the fighters' X, added to cameraX; objects with objFlag80 bit 7 are shifted by -cameraScroll so they stay fixed in the world (03:BC33); cleared at stage setup
+063E selectState ; sub-state of the player select screen (06:80CE)
+063F matchWinner ; winner slot (0/1) of the last match (MatchOverSetWinner); the story stores a stage-based step (MatchOverStoryStage); negative = none; read by RematchPrompt and StoryCardBoth
+0640 roundCounter ; rounds played in the current match (FightKoPause INCs it)
+0643 turnFlip 2 ; per fighter: objFlip saved by TurnToOpponent before FaceOpponent; if the facing changed it is applied and StartTurn runs
+064B ballInputBits 2 ; per fighter: buttons collected by ReadBallInput
+066D paletteUploadFlag ; $FF = palette changed, uploaded by the NMI
+066E matchResults ; tournament: winner slot (0/1, ptr_08) of each match, indexed by tournamentMatch (TournamentStoreResult); never read back
+0671 lastAttacker ; side (0/1) of the fighter that landed the last hit (HitReactionCommon: victim EOR 1; KoWaitOpponent: the opponent); at the round end FightWinPoseSetup overwrites it with the winner slot (0/1), 3 = draw (equal HP), 4 = double KO; 0 on FightLostSetup; picks the win voice in WinVoiceSelect, the winner pose and the bonus screen
+0674 timerTick ; frames until the round timer loses a second (UpdateHud counts it down, reloads it with ScaleTime($4E), then DEC timerOnes)
+0675 nameEntryStep ; name entry sub-state (NameEntryScreen jump table)
+0676 nameEntrySlot ; slot of the name being entered (NameEntryNextSlot increments it; indexes tournamentChar and gives the player side): playerNameBuf index = 4 * slot + nameEntryPos
+0677 nameEntryPos ; letter position (0-3) inside the name being entered; NameEntryLetterMove advances it, at 4 it jumps back to 3 and selects the END cell
+0678 nameEntryGrid ; selected cell of the letter grid (row * 16 + column); $2C = blank, $2D = END; NameEntryLetterMove stores the letter code from NameEntryRowBase
+067A moveFlags 2 ; per fighter: nonzero while a character move runs (set by specials, e.g. Leo spin; cleared by ReturnToStand, KO, the 0E:DDF5 reset); the AI reads the target's flag (AiCondDon, AiCondKeepCheck, AiCondWatchDon)
+07B9 sndVibIdx 6 ; per channel: index into the vibrato / pitch-envelope table (VibratoNext reads EnvelopePtrs table at this offset, then increments it)
+0004 tmp04 4 ; scratch bytes of the drawing / hit / palette code (ram_0004-0007), meaning differs per routine
+009F savedStoryStage ; storyStage copy taken by FightStoryAdvanceStage (E770); restored by the rematch / continue code (0D:A4ED)
+00A0 playerLevel 2 ; per player strength level (3 at game start), changed with up/down in the VS setup screen (0C:893A), shown by DrawVsLevelSprites and read by ScaleDamage
+00A4 startPressed ; joyPressedAny accumulated by RunGameMode / screens, cleared at fade start
+00A5 tmpA5 3 ; scratch of the fight screen code (ram_00A5/A7 are used by the shake / ramp routines)
+00AA hitFreeze ; hit-stop / slow-motion control of the fight frame (FightFrame, FightFrameTail): 1-$7F = frames left in which the fighter update is skipped (CheckHits sets $14 / $18, dash and walk hits 2), bit 7 (KO start $80) = slow motion: the update runs once in 4 frames (divCount); 0 = normal
+00AB divCount ; loop counter of the bank 03 / FD1F distance loops
+00AC hitSide ; CheckHits: fighter slot (0/1) being hit
+00CF queueSaveX ; sub_0C_8BA4 keeps X here
+0104 hitTmp ; CheckHits scratch (shifted left in HitReactionCommon)
+010C irqSplitSub ; scanline latch of IRQ split $10 (IRQ_SPLIT_H13) when nonzero (SetIrqSplit, SetIrqForFrame), else IrqLatchBySplit; set by the intro parade (IntroParade, 0C:91E2) and from scrollY (0C:926B)
+0128 ppuReadCount ; sub_FE57: bytes read back from the nametable
+012B playerNameBuf 8 ; 4 bytes per player: initials / name data of the high-score name entry (cleared by 0C:8D46)
+0027 titleChoice ; title menu selection (cursor row, TitleCursorY gives its Y)
+000D tmpPosX ; scratch: X position / VRAM column during hit and AI distance code
+0012 tmp12 6 ; scratch bytes of the score code (AddScoreByChar: digit, char, decimal), StartAttack and AI (aiBallRange / aiRange aliases)
+0031 continuesLeft ; continues left: GameModeStart loads it from ScreenCountByDifficulty (2/1/0 by difficulty), the CONTINUE screen shows it as a digit tile (DrawScreenCounterTile) and Start decrements it; 0 = no CONTINUE offered (not in VS CPU)
+0047 irqBankShadow ; R7 bank value saved next to bankBeforeSound; only no-caller code uses it (0F:FBF0 restore, UnusedMapPrg3031)
+0089 winTimerStep ; signed step counter of KoWinTimerStep: +1 per call for lastAttacker 0, -1 for lastAttacker 1 (then reset to 0 and objParam is halved), unchanged for lastAttacker >= 2; cleared at 0E:D2A1
+0096 endCardPhase ; 0/1 phase of the end-of-fight cards: 0 = draw the screen, 1 = wait / accepted (RematchPrompt, ContinueMenuCursor, FightBonusCardWait); reset to 0 when the card finishes
+0098 pauseLock ; nonzero blocks the pause (PauseCheck): $FF at game start, 1 at fighter setup, nonzero during the KO / round-over / win sequences, cleared when the intro fight phase ends
+0105 bracketA 4 ; bracket slots 0-3 (first round), parallel to tournamentChar: for a player-controlled slot (tournamentFlags bit 7 clear) the player ordinal = name index in playerNameBuf (0C:9033-9046); the bracket text shows $04 for a CPU slot. Contiguous with bracketB (cleared together, 8 bytes)
+0109 bracketB 4 ; bracket slots 4-7 (match winners advancing), parallel to tournamentChar+4: TournamentStoreResult copies the winner's bracketA entry to bracketB[match]
+0635 scoredHits ; scoring hits counted this frame by AddScoreForHit; the fight frame redraws the scores (DrawScores) and clears it
+0636 pushTimer 2 ; per fighter: frames of the push-back (set to 5 or 8 by the hit code, counted down by the fight frame) (BBB7 / FD1F add ±1 to objVelX while it counts down)
+0639 jumpMoveFlag 2 ; per fighter: cleared at jump start, set to the A/B press by the first attack in the air (StateJump), blocks a second one
+013B tournamentNames 17 ; 3 name characters per match winner (4-byte stride, index = match * 4), copied from playerNameBuf by TournamentStoreResult
+014C tournamentChar 8 ; CHAR_* of the bracket slots: 0-3 first round, 4+match = the winner of that match (TournamentStoreResult)
+0154 tournamentMatch ; index of the match being played (2 bracket slots each)
+0155 tournamentFlags 7 ; per bracket slot: bit 7 = CPU controlled (two CPU slots: the match is auto-played), low bits = slot
+015D tournamentBits ; bit mask of finished matches / winners (OR-ed in loc_E61A)

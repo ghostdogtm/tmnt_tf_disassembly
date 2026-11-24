@@ -1,0 +1,46 @@
+; Bank pairs of $8000-$BFFF operands in the fixed banks, seen in Mesen runs (tools/mesen/merge_runs.py).
+; Generated - hand-written hints belong in rom.txt (they override these).
+
+bank D7D4 08 ; 159433 run(s) of the instruction
+bank D7D9 08 ; 159433 run(s) of the instruction
+bank F65C 00 ; 139864 run(s) of the instruction
+; F66D runs with several pairs: 00 x140353, 02 x785, 04 x11, 06 x39, 08 x4, 0C x441
+bank F69D 00 ; 1594 run(s) of the instruction
+bank F6CD 00 ; 175 run(s) of the instruction
+bank F6DF 0C ; 13 run(s) of the instruction
+bank F6EA 08 ; 6297 run(s) of the instruction
+bank F6FC 06 ; 9622 run(s) of the instruction
+bank F705 08 ; 139749 run(s) of the instruction
+bank F70E 0A ; 20715 run(s) of the instruction
+bank F717 02 ; 71 run(s) of the instruction
+bank F720 0C ; 624 run(s) of the instruction
+bank F729 0C ; 2 run(s) of the instruction
+bank F739 0C ; 3 run(s) of the instruction
+bank F742 0C ; 1361 run(s) of the instruction
+bank F74B 0C ; 4146 run(s) of the instruction
+bank F754 02 ; 15 run(s) of the instruction
+bank F75F 02 ; 55 run(s) of the instruction
+bank F762 02 ; 55 run(s) of the instruction
+bank F76F 02 ; 34 run(s) of the instruction
+bank F780 02 ; 20715 run(s) of the instruction
+bank F789 02 ; 20470 run(s) of the instruction
+bank F7A0 02 ; 2350 run(s) of the instruction
+bank F7A9 0C ; 244 run(s) of the instruction
+bank F7B2 0C ; 56701 run(s) of the instruction
+bank F7BB 0C ; 171 run(s) of the instruction
+bank F7C4 0C ; 2 run(s) of the instruction
+bank F7CD 0C ; 766 run(s) of the instruction
+bank F7D8 0C ; 47 run(s) of the instruction
+bank F7E1 0C ; 1186 run(s) of the instruction
+bank F7EA 0C ; 510 run(s) of the instruction
+bank F805 02 ; 61 run(s) of the instruction
+bank F80E 02 ; 17 run(s) of the instruction
+bank FD4D 02 ; 20715 run(s) of the instruction
+bank FD50 02 ; 20715 run(s) of the instruction
+bank FDDD 02 ; 41430 run(s) of the instruction
+bank FDE2 02 ; 41430 run(s) of the instruction
+bank FDF6 02 ; 46 run(s) of the instruction
+bank FDF9 02 ; 20715 run(s) of the instruction
+bank FDFC 02 ; 20715 run(s) of the instruction
+bank FDFF 02 ; 20715 run(s) of the instruction
+bank FE02 02 ; 23034 run(s) of the instruction
